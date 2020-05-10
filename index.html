@@ -21,16 +21,18 @@
 			import { VRButton } from './jsm/webxr/VRButton.js';
 			import { XRControllerModelFactory } from './jsm/webxr/XRControllerModelFactory.js';
 
+			import Game from './Game.js';
+
 			var clock = new THREE.Clock();
 
 			var camera, scene, raycaster, renderer;
 			var room; // Contains the main objects in the scene.
 			var controller, controllerGrip, tempMatrix = new THREE.Matrix4();
 			var intersectedObject, intersectedPosition; // Contains the object and intersected position of where the user is pointing.
-			var loader; // Texture loader
 			var floor;
-			
 			var dolly; // The dolly contains the camera and the controller.  Move the dolly to move the camera and ontroller.
+			
+			const game = new Game();
 			
 			init();
 			animate();
@@ -59,11 +61,10 @@
 
 				addLights();
 
-				loader = new THREE.TextureLoader();
-				
 				// Add some dummy objects to view
-				addFloatingCubes();	
-				addFloor();
+				game.init(scene);
+				//game.addFloatingCubes(room);	
+				//game.addFloor(scene);
 		
 				raycaster = new THREE.Raycaster();
 
@@ -77,7 +78,7 @@
 				
 				container.appendChild( renderer.domElement );
 
-
+/*
 				function onSelectStart() {
 					// Add code for when user presses their controller
 				}
@@ -85,10 +86,10 @@
 				function onSelectEnd() {
 					// Add code for when user releases the button on their controller
 				}
-
+*/
 				controller = renderer.xr.getController( 0 );
-				controller.addEventListener( 'selectstart', onSelectStart );
-				controller.addEventListener( 'selectend', onSelectEnd );
+				controller.addEventListener( 'selectstart', game.onSelectStart );
+				controller.addEventListener( 'selectend', game.onSelectEnd );
 				controller.addEventListener( 'connected', function ( event ) {
 					this.add( buildController( event.data ) );
 				} );
@@ -96,7 +97,6 @@
 				controller.addEventListener( 'disconnected', function () {
 					this.remove( this.children[ 0 ] );
 				} );
-				//controller.position.y += 5;
 				dolly.add( controller );
 
 				var controllerModelFactory = new XRControllerModelFactory();
@@ -177,67 +177,12 @@
 					intersectedObject = undefined;
 				}
 
+				game.update(scene);
+				
 				renderer.render( scene, camera );
 			}
 			
 
-			function addFloatingCubes() {
-				var geometry = new THREE.BoxBufferGeometry( 0.15, 0.15, 0.15 );
-
-				loader.load('textures/antattack/antattack.png', function ( texture ) {
-
-					// Stop texture being blurred
-					texture.magFilter = THREE.NearestFilter;
-					texture.minFilter = THREE.NearestFilter;
-
-					var material = new THREE.MeshBasicMaterial({map: texture});
-					
-					for ( var i = 0; i < 50; i ++ ) {
-						var object = new THREE.Mesh(geometry, material);
-
-						object.castShadow = true;
-						object.receiveShadow = true;
-
-						object.position.x = Math.random() * 4 - 2;
-						object.position.y = Math.random() * 4;
-						object.position.z = Math.random() * 4 - 2;
-
-						object.rotation.x = Math.random() * 2 * Math.PI;
-						object.rotation.y = Math.random() * 2 * Math.PI;
-						object.rotation.z = Math.random() * 2 * Math.PI;
-						
-						room.add( object );
-					}
-				});
-			}
-			
-			
-			function addFloor() {
-				loader.load(
-					'textures/antattack/antattack.png',
-					texture => {
-						texture.wrapS = THREE.NearestFilter;
-						texture.wrapT = THREE.NearestFilter;
-						texture.magFilter = THREE.NearestFilter;
-						texture.minFilter = THREE.NearestFilter;
-						var woodMaterial = new THREE.MeshPhongMaterial({
-						map: texture
-						});
-
-						floor = new THREE.Mesh(
-						  new THREE.PlaneGeometry(30, 30, 32),
-						  woodMaterial
-						);
-						floor.rotation.x = -Math.PI / 2;
-						floor.position.x = 0;
-						floor.position.y = 0;
-						floor.position.z = -10;
-						floor.receiveShadow = true;
-						scene.add(floor);
-
-					}
-				);
-			}
 
 
 		</script>
