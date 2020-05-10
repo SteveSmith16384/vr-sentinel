@@ -51,11 +51,12 @@ export default class Game {
 		for (s of scene.children) {
 			if (s.components) {
 				if (s.components["face"] != undefined) {
-					s.lookAt(dolly.position);
+					s.rotation.y = Math.atan2( ( dolly.position.x - s.position.x ), ( dolly.position.z - s.position.z ) );
 				}
 			}
 		}
 		dolly.position.z -= .01; // todo - move in direction of camera
+		dolly.position.x -= .003; // todo - move in direction of camera
 	}
 	
 
