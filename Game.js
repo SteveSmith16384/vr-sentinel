@@ -1,5 +1,5 @@
 import * as THREE from './build/three.module.js';
-
+import { createBillboard } from './scs/helperfunctions.js';
 
 export default class Game {
 
@@ -22,9 +22,11 @@ export default class Game {
 		this.loader = new THREE.TextureLoader();
 
 		this.addFloatingCubes(scene);
-		this.addFloor(scene);
-		//addFloatingCubes();
-		//addFloor();
+		//this.addFloor(scene);
+		
+		createBillboard(scene, this.loader, 'textures/antattack/antattack.png', 30, 30, function(billboard) {
+			scene.add(billboard);
+		});
 	}
 	
 	
