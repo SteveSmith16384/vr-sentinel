@@ -5,7 +5,7 @@ export default class Game {
 
     constructor() {
 		this.loader = undefined; // Texture loader
-		this.entities = new THREE.Group();
+		this.entities = undefined;
 	}
 	
 	
@@ -21,13 +21,13 @@ export default class Game {
 
 	init(scene) {
 		this.loader = new THREE.TextureLoader();
+		this.entities = new THREE.Group();
 
-		//this.addFloatingCubes(scene);
-		//this.addFloor(scene);
-		
 		// Add floor
 		createBillboard(scene, this.loader, 'textures/3ddeathchase/grass.jpg', 30, 30, function(floor) {
 			floor.rotation.x = -Math.PI / 2;
+			//floor.material.map.textures.repeat.x = 10;
+			//floor.material.textures[0].repeat.y = 10;
 			scene.add(floor);
 		});
 
@@ -37,10 +37,29 @@ export default class Game {
 			floor.position.z = -10;
 			floor.position.y = 4;
 			scene.add(floor);
+			
+			floor.components = [];
+			floor.components["face"] = true;
+			//entities.add(scene);
 		});
 	}
 	
+
+	update(scene, dolly) {
+		var s;
+		
+		for (s of scene.children) {
+			if (s.components) {
+				if (s.components["face"] != undefined) {
+					s.lookAt(dolly.position);
+				}
+			}
+		}
+		dolly.position.z -= .01; // todo - move in direction of camera
+	}
 	
+
+	/*
 	addFloatingCubes(room) {
 		var geometry = new THREE.BoxBufferGeometry( 0.15, 0.15, 0.15 );
 
@@ -69,7 +88,7 @@ export default class Game {
 			}
 		});
 	}
-	
+	*/
 	/*
 	addFloor(scene) {
 		this.loader.load(
@@ -99,8 +118,5 @@ export default class Game {
 	}
 */
 
-	update() {
-	}
-	
 }
 

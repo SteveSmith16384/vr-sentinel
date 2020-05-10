@@ -7,9 +7,10 @@ export function createBillboard(scene, loader, texture, w, h, callback) {
 			texture.wrapT = THREE.NearestFilter;
 			texture.magFilter = THREE.NearestFilter;
 			texture.minFilter = THREE.NearestFilter;
+			
 			var woodMaterial = new THREE.MeshPhongMaterial({
 				map: texture,
-				 transparent: true
+				transparent: true
 			});
 
 			var floor = new THREE.Mesh(
