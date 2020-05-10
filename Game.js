@@ -5,6 +5,7 @@ export default class Game {
 
     constructor() {
 		this.loader = undefined; // Texture loader
+		this.entities = new THREE.Group();
 	}
 	
 	
@@ -21,11 +22,21 @@ export default class Game {
 	init(scene) {
 		this.loader = new THREE.TextureLoader();
 
-		this.addFloatingCubes(scene);
+		//this.addFloatingCubes(scene);
 		//this.addFloor(scene);
 		
-		createBillboard(scene, this.loader, 'textures/antattack/antattack.png', 30, 30, function(billboard) {
-			scene.add(billboard);
+		// Add floor
+		createBillboard(scene, this.loader, 'textures/3ddeathchase/grass.jpg', 30, 30, function(floor) {
+			floor.rotation.x = -Math.PI / 2;
+			scene.add(floor);
+		});
+
+
+		// Add tree test
+		createBillboard(scene, this.loader, 'textures/3ddeathchase/tree.png', 1, 8, function(floor) {
+			floor.position.z = -10;
+			floor.position.y = 4;
+			scene.add(floor);
 		});
 	}
 	
@@ -59,7 +70,7 @@ export default class Game {
 		});
 	}
 	
-	
+	/*
 	addFloor(scene) {
 		this.loader.load(
 			'textures/antattack/antattack.png',
@@ -86,7 +97,7 @@ export default class Game {
 			}
 		);
 	}
-
+*/
 
 	update() {
 	}

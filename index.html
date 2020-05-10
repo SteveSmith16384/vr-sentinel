@@ -42,7 +42,7 @@
 				document.body.appendChild( container );
 
 				scene = new THREE.Scene();
-				scene.background = new THREE.Color( 0x505050 );
+				scene.background = new THREE.Color( 0x4444ff );
 
 				camera = new THREE.PerspectiveCamera( 50, window.innerWidth / window.innerHeight, 0.1, 100 );
 
@@ -51,10 +51,7 @@
 				dolly.add( camera );
 				scene.add( dolly );
 	
-				room = new THREE.LineSegments(
-					new BoxLineGeometry( 6, 6, 6, 10, 10, 10 ).translate( 0, 3, 0 ),
-					new THREE.LineBasicMaterial( { color: 0x808080 } )
-				);
+				room = new THREE.Group();
 				room.castShadow = true;
 				room.receiveShadow = true;
 				scene.add( room );
