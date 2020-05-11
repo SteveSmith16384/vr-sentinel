@@ -105,8 +105,10 @@ export function createScenery(scene, loader) {
 		
 		floor.components = [];
 		floor.components["face"] = true;
+		floor.components["text"] = "Barrel";
 		//entities.add(scene);
 	});
+	
 	
 	// Table
 	createBillboard(scene, loader, 'textures/dizzy3/table.png', 2, 2, function(floor) {

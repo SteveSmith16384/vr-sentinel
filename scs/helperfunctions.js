@@ -30,3 +30,27 @@ export function createBillboard(scene, loader, texture, w, h, callback) {
 		}
 	);
 }
+
+export function createText(text) {
+		var canvas1 = document.createElement('canvas');
+		var context1 = canvas1.getContext('2d');
+		context1.font = "Bold 30px Arial";
+		context1.fillStyle = "rgba(255,255,255,1)";
+		context1.fillText(text, 0, 60);
+
+		// canvas contents will be used for a texture
+		var texture1 = new THREE.Texture(canvas1)
+		texture1.needsUpdate = true;
+
+		var material1 = new THREE.MeshBasicMaterial({ map: texture1, side: THREE.DoubleSide });
+		material1.transparent = true;
+
+		var mesh = new THREE.Mesh(
+			new THREE.PlaneGeometry(3, 1),
+			material1
+		  );
+		//this.text.position.set(0, 2, -5);
+		//scene.add(this.text)
+		return mesh;
+
+}
