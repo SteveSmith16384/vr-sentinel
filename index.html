@@ -13,6 +13,7 @@
 
 		<script src="js/vr/HelioWebXRPolyfill.js"></script>
 
+
 		<script type="module">
 
 			import * as THREE from './build/three.module.js';
@@ -100,6 +101,31 @@
 				window.addEventListener( 'resize', onWindowResize, false );
 
 				document.body.appendChild( VRButton.createButton( renderer ) );
+
+var canvas1 = document.createElement('canvas');
+var context1 = canvas1.getContext('2d');
+context1.font = "Bold 30px Arial";
+context1.fillStyle = "rgba(255,255,255,1)";
+context1.fillText('Hello, world!', 0, 60);
+
+// canvas contents will be used for a texture
+var texture1 = new THREE.Texture(canvas1)
+texture1.needsUpdate = true;
+//texture1.transparent = true;
+
+var material1 = new THREE.MeshBasicMaterial({ map: texture1, side: THREE.DoubleSide });
+material1.transparent = true;
+
+var mesh1 = new THREE.Mesh(
+	new THREE.PlaneGeometry(3, 1),
+	material1
+  );
+mesh1.position.set(0, 2, -5);
+//mesh1.rotation.x = -0.9;
+//shape.add(mesh1);
+// Note that mesh1 gets added to the shape and not to the scene
+
+scene.add(mesh1)
 
 			}
 
