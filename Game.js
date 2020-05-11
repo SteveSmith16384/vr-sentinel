@@ -6,15 +6,32 @@ import { createScenery } from './scs/dizzy.js';
 export default class Game {
 
     constructor() {
+		this.scene;
 		this.loader = undefined; // Texture loader
-		this.entities = undefined;
+		//this.entities = undefined;
 		
 		this.text = undefined;
 		this.textObject = undefined;
 	}
 	
 
-	currentPointer(object, point) {
+	currentPointer(object, point) {		
+		if (object == undefined) {
+			if (this.text != undefined) {
+				this.scene.remove(this.text);
+				this.text = undefined;
+			}
+		} else if (object != this.textObject) {
+			this.textObject = object;
+			if (this.text != undefined) {
+				this.scene.remove(this.text);
+			}
+			if (object.components != undefined && object.components["text"] != undefined) {
+				this.text = createText(object.components["text"]);
+				this.text.position.set(0, 2, -5);
+				this.scene.add(this.text);
+			}
+		}
 	}
 	
 	
@@ -29,6 +46,7 @@ export default class Game {
 
 
 	init(scene) {
+		this.scene = scene;
 		this.loader = new THREE.TextureLoader();
 		this.entities = new THREE.Group();
 		

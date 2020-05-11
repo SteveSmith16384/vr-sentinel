@@ -27,7 +27,7 @@
 			var clock = new THREE.Clock();
 
 			var camera, scene, raycaster, renderer;
-			var room; // Contains the main objects in the scene.
+			//var room; // Contains the main objects in the scene.
 			var controller, controllerGrip, tempMatrix = new THREE.Matrix4();
 			var intersectedObject, intersectedPosition; // Contains the object and intersected position of where the user is pointing.
 			var floor;
@@ -51,12 +51,12 @@
 				dolly.position.set( 0, 1.5, 0 );
 				dolly.add( camera );
 				scene.add( dolly );
-	
+	/*
 				room = new THREE.Group();
 				room.castShadow = true;
 				room.receiveShadow = true;
 				scene.add( room );
-
+*/
 				addLights();
 
 				// Add some dummy objects to view
@@ -155,22 +155,25 @@
 				// find what user is pointing at
 				tempMatrix.identity().extractRotation( controller.matrixWorld );
 				raycaster.ray.origin.setFromMatrixPosition( controller.matrixWorld );
-				raycaster.ray.direction.set( 0, 0, - 1 ).applyMatrix4( tempMatrix );
+				raycaster.ray.direction.set( 0, 0, -1 ).applyMatrix4( tempMatrix );
 
-				var intersects = raycaster.intersectObjects( room.children );
+				var intersects = raycaster.intersectObjects(scene.children);
 
 				if (intersects.length > 0) {
+//alert('here');
 					intersectedObject = intersects[0].object;
 					intersectedPosition = intersects[0].point;
 
 					// Rotate the object to show it is selected
-					intersectedObject.rotation.y += .1;
+					//intersectedObject.rotation.y += .1;
+
+//intersectedObject.rotation.y += .1; // remove
+					game.currentPointer(intersectedObject, intersectedPosition);
 
 				} else {
 					intersectedObject = undefined;
 				}
 				
-				game.currentPointer(intersectedObject, intersectedPosition);
 
 				game.update(scene, dolly);
 				
