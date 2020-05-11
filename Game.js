@@ -1,5 +1,6 @@
 import * as THREE from './build/three.module.js';
 import { createBillboard } from './scs/helperfunctions.js';
+import { createScenery } from './scs/3ddeathchase.js';
 
 export default class Game {
 
@@ -22,7 +23,11 @@ export default class Game {
 	init(scene) {
 		this.loader = new THREE.TextureLoader();
 		this.entities = new THREE.Group();
+		
+		createScenery(scene, this.loader);
+		
 
+/*
 		// Add floor
 		createBillboard(scene, this.loader, 'textures/3ddeathchase/grass.jpg', 30, 30, function(floor) {
 			floor.rotation.x = -Math.PI / 2;
@@ -42,6 +47,7 @@ export default class Game {
 			floor.components["face"] = true;
 			//entities.add(scene);
 		});
+		*/
 	}
 	
 
