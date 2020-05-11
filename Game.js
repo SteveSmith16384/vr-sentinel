@@ -1,6 +1,7 @@
 import * as THREE from './build/three.module.js';
 import { createBillboard } from './scs/helperfunctions.js';
-import { createScenery } from './scs/3ddeathchase.js';
+//import { createScenery } from './scs/3ddeathchase.js';
+import { createScenery } from './scs/dizzy.js';
 
 export default class Game {
 
@@ -61,8 +62,9 @@ export default class Game {
 				}
 			}
 		}
-		dolly.position.z -= .01; // todo - move in direction of camera
-		dolly.position.x -= .003; // todo - move in direction of camera
+
+		//dolly.position.z -= .01; // todo - move in direction of camera
+		//dolly.position.x -= .003; // todo - move in direction of camera
 	}
 	
 
