@@ -57,7 +57,6 @@ export function createText(text) {
 
 
 export function createCuboid(tex, callback) {
-
 	loader.load(tex, function ( texture ) {
 		var material = new THREE.MeshBasicMaterial({map: texture});
 		var geometry = new THREE.Geometry();
@@ -102,3 +101,28 @@ export function createCuboid(tex, callback) {
 	});
 
 }
+
+
+export function createPlane(tex, callback) {
+	loader.load(tex), function ( texture ) {
+		var material = new THREE.MeshBasicMaterial({map: texture});
+		var geometry = new THREE.Geometry();
+		geometry.vertices.push(
+		  new THREE.Vector3(-1,  0,  1),  // 2
+		  new THREE.Vector3( 1,  0,  1),  // 3
+		  new THREE.Vector3(-1,  0, -1),  // 6
+		  new THREE.Vector3( 1,  0, -1),  // 7
+		);
+
+		geometry.faces.push(
+		  // top
+		  new THREE.Face3(2, 7, 6),
+		  new THREE.Face3(2, 3, 7),
+		);
+		
+		const plane = new THREE.Mesh(geometry, material);
+		callback(plane);
+	};
+
+}
+

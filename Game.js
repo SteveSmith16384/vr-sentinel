@@ -4,6 +4,14 @@ import { createBillboard, createText } from './scs/helperfunctions.js';
 //import { createScenery } from './scs/dizzy.js';
 import { createScenery } from './scs/thesentinel.js';
 
+
+/*
+ECS Components:-
+face - Slways face the camera
+text - Text to show if player pointing at it.
+
+
+*/
 export default class Game {
 
     constructor() {
@@ -53,9 +61,9 @@ export default class Game {
 		
 		createScenery(scene, this.loader);
 		
-		this.text = createText("HELLO!");
-		this.text.position.set(0, 2, -5);
-		scene.add(this.text)
+		//this.text = createText("HELLO!");
+		//this.text.position.set(0, 2, -5);
+		//scene.add(this.text)
 	}
 	
 
