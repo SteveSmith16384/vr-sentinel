@@ -132,7 +132,7 @@ export function createPlane_WORKS(loader, tex, callback) {
 
 
 export function createPlane_NoTex(h1, h2, h3, h4) {
-	var material = new THREE.MeshLambertMaterial({color: 0xffffff });
+	var material = new THREE.MeshPhongMaterial({color: 0xffffff });
 	var geometry = new THREE.Geometry();
 	geometry.vertices.push(
 	  new THREE.Vector3(-1, -1,  1),  // 0
@@ -149,6 +149,8 @@ export function createPlane_NoTex(h1, h2, h3, h4) {
 	  new THREE.Face3(2, 7, 6),
 	  new THREE.Face3(2, 3, 7),
 	);
+	
+	geometry.scale(.5, .5, .5);
 	
 	geometry.computeFaceNormals();
 	
