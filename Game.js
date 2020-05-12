@@ -1,7 +1,8 @@
 import * as THREE from './build/three.module.js';
 import { createBillboard, createText } from './scs/helperfunctions.js';
 //import { createScenery } from './scs/3ddeathchase.js';
-import { createScenery } from './scs/dizzy.js';
+//import { createScenery } from './scs/dizzy.js';
+import { createScenery } from './scs/thesentinel.js';
 
 export default class Game {
 
@@ -63,14 +64,13 @@ export default class Game {
 		
 		for (s of scene.children) {
 			if (s.components) {
+				// Point to face camera
 				if (s.components["face"] != undefined) {
 					s.rotation.y = Math.atan2( ( dolly.position.x - s.position.x ), ( dolly.position.z - s.position.z ) );
 				}
 			}
 		}
 	}
-	
-
 
 }
 

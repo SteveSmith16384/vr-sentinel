@@ -96,6 +96,23 @@ export function createScenery(scene, loader) {
 	);
 
 
+	// Door
+	createBillboard(scene, loader, 'textures/dizzy3/door.png', 2, 2, function(floor) {
+		floor.position.x = -WIDTH/2;
+		floor.position.y = 1;
+		floor.position.z = -4;
+
+		floor.rotation.y = Math.PI / 2;
+
+		scene.add(floor);
+		
+		floor.components = [];
+		floor.components["text"] = "Door";
+		//entities.add(scene);
+	});
+	
+	
+
 	// Barrel
 	createBillboard(scene, loader, 'textures/dizzy3/barrel.png', 2, 2, function(floor) {
 		floor.position.x = -2;
