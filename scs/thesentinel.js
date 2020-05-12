@@ -47,6 +47,13 @@ export function createScenery(scene, loader) {
 }
 
 
+export function objectPointedAt(object, point) {
+	if (object != undefined) {
+		object.material.color.setHex(0xff0000);
+	}
+}
+
+
 function create2DArray(rows) {
   var arr = [];
 

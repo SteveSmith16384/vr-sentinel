@@ -164,3 +164,24 @@ export function createScenery(scene, loader) {
 	});
 
 }
+
+
+export function objectPointedAt(object, point) {
+		if (object == undefined) {
+			if (this.text != undefined) {
+				this.scene.remove(this.text);
+				this.text = undefined;
+			}
+		} else if (object != this.textObject) {
+			this.textObject = object;
+			if (this.text != undefined) {
+				this.scene.remove(this.text);
+			}
+			if (object.components != undefined && object.components["text"] != undefined) {
+				this.text = createText(object.components["text"]);
+				this.text.position.set(0, 2, -5);
+				this.scene.add(this.text);
+			}
+		}
+	}
+}
