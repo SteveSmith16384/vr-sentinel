@@ -160,14 +160,11 @@
 				var intersects = raycaster.intersectObjects(scene.children);
 
 				if (intersects.length > 0) {
-//alert('here');
 					intersectedObject = intersects[0].object;
 					intersectedPosition = intersects[0].point;
 
 					// Rotate the object to show it is selected
 					//intersectedObject.rotation.y += .1;
-
-//intersectedObject.rotation.y += .1; // remove
 					game.currentPointer(intersectedObject, intersectedPosition);
 
 				} else {

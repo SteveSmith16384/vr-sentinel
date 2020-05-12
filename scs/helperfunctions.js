@@ -18,14 +18,7 @@ export function createBillboard(loader, texture, w, h, callback) {
 			  woodMaterial
 			);
 			//floor.rotation.x = -Math.PI / 2;
-			
-			//floor.position.x = 0;
-			//floor.position.y = 0;
-			//floor.position.z = -10;
 			floor.receiveShadow = true;
-			//scene.add(floor);
-			//return floor;
-			
 			callback(floor);
 		}
 	);
@@ -48,9 +41,7 @@ export function createText(text) {
 		var mesh = new THREE.Mesh(
 			new THREE.PlaneGeometry(3, 1),
 			material1
-		  );
-		//this.text.position.set(0, 2, -5);
-		//scene.add(this.text)
+		);
 		return mesh;
 
 }
@@ -59,7 +50,7 @@ export function createText(text) {
 export function createCuboid(loader, tex, callback) {
 	loader.load(tex, function ( texture ) {
 
-		var material = new THREE.MeshBasicMaterial({map: texture});
+		var material = new THREE.MeshPhongMaterial({map: texture});
 		var geometry = new THREE.Geometry();
 		geometry.vertices.push(
 		  new THREE.Vector3(-1, -1,  1),  // 0
@@ -72,7 +63,17 @@ export function createCuboid(loader, tex, callback) {
 		  new THREE.Vector3( 1,  1, -1),  // 7
 		);
 
-		geometry.faces.push(
+ /*
+       6----7
+      /|   /|
+     2----3 |
+     | |  | |
+     | 4--|-5
+     |/   |/
+     0----1
+  */
+
+  geometry.faces.push(
 		  // front
 		  new THREE.Face3(0, 3, 2),
 		  new THREE.Face3(0, 1, 3),
@@ -93,6 +94,8 @@ export function createCuboid(loader, tex, callback) {
 		  new THREE.Face3(4, 5, 1),
 		);
 		
+		geometry.computeFaceNormals();
+
 		const cube = new THREE.Mesh(geometry, material);
 		callback(cube);
 	});
@@ -127,59 +130,30 @@ export function createPlane_WORKS(loader, tex, callback) {
 
 }
 
-export function createPlane(loader, tex, h1, h2, h3, h4, callback) {
-	loader.load(tex, function ( texture ) {
 
-		var material = new THREE.MeshBasicMaterial({map: texture});
-		var geometry = new THREE.Geometry();
-		geometry.vertices.push(
-		  new THREE.Vector3(-1, -1,  1),  // 0
-		  new THREE.Vector3( 1, -1,  1),  // 1
-		  new THREE.Vector3(-1,  h1,  1),  // 2
-		  new THREE.Vector3( 1,  h2, 1),  // 3
-		  new THREE.Vector3(-1, -1, -1),  // 4
-		  new THREE.Vector3( 1, -1, -1),  // 5
-		  new THREE.Vector3(-1,  h3, -1),  // 6
-		  new THREE.Vector3( 1,  h4, -1),  // 7
-		);
+export function createPlane_NoTex(h1, h2, h3, h4) {
+	var material = new THREE.MeshLambertMaterial({color: 0xffffff });
+	var geometry = new THREE.Geometry();
+	geometry.vertices.push(
+	  new THREE.Vector3(-1, -1,  1),  // 0
+	  new THREE.Vector3( 1, -1,  1),  // 1
+	  new THREE.Vector3(-1,  h1,  1),  // 2
+	  new THREE.Vector3( 1,  h2, 1),  // 3
+	  new THREE.Vector3(-1, -1, -1),  // 4
+	  new THREE.Vector3( 1, -1, -1),  // 5
+	  new THREE.Vector3(-1,  h3, -1),  // 6
+	  new THREE.Vector3( 1,  h4, -1),  // 7
+	);
 
-		geometry.faces.push(
-		  new THREE.Face3(2, 7, 6),
-		  new THREE.Face3(2, 3, 7),
-		);
-		
-		const cube = new THREE.Mesh(geometry, material);
-		callback(cube);
-	});
-
-}
-
-/*
-export function createPlane_BROKE(loader, tex, callback) {
-	loader.load(tex), function (texture) {
-		var material = new THREE.MeshBasicMaterial({map: texture});
-		var geometry = new THREE.Geometry();
-		geometry.vertices.push(
-		  new THREE.Vector3(-1, -1,  1),  // 0
-		  new THREE.Vector3( 1, -1,  1),  // 1
-		  new THREE.Vector3(-1,  1,  1),  // 2
-		  new THREE.Vector3( 1,  1,  1),  // 3
-		  new THREE.Vector3(-1, -1, -1),  // 4
-		  new THREE.Vector3( 1, -1, -1),  // 5
-		  new THREE.Vector3(-1,  1, -1),  // 6
-		  new THREE.Vector3( 1,  1, -1),  // 7
-		);
-
-		geometry.faces.push(
-		  // top
-		  new THREE.Face3(2, 7, 6),
-		  new THREE.Face3(2, 3, 7),
-		);
-		
-		const plane = new THREE.Mesh(geometry, material);
-		callback(plane);
-	};
+	geometry.faces.push(
+	  new THREE.Face3(2, 7, 6),
+	  new THREE.Face3(2, 3, 7),
+	);
+	
+	geometry.computeFaceNormals();
+	
+	const cube = new THREE.Mesh(geometry, material);
+	return cube;
 
 }
 
-*/
