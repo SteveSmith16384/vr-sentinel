@@ -1,6 +1,6 @@
 import * as THREE from '../build/three.module.js';
 
-export function createBillboard(scene, loader, texture, w, h, callback) {
+export function createBillboard(loader, texture, w, h, callback) {
 	loader.load(texture,
 		texture => {
 			texture.wrapS = THREE.NearestFilter;
@@ -56,7 +56,7 @@ export function createText(text) {
 }
 
 
-export function createCuboid(tex, callback) {
+export function createCuboid(loader, tex, callback) {
 	loader.load(tex, function ( texture ) {
 		var material = new THREE.MeshBasicMaterial({map: texture});
 		var geometry = new THREE.Geometry();
@@ -103,7 +103,7 @@ export function createCuboid(tex, callback) {
 }
 
 
-export function createPlane(tex, callback) {
+export function createPlane(loader, tex, callback) {
 	loader.load(tex), function ( texture ) {
 		var material = new THREE.MeshBasicMaterial({map: texture});
 		var geometry = new THREE.Geometry();
