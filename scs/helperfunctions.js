@@ -47,7 +47,7 @@ export function createText(text) {
 }
 
 
-export function createCuboid(loader, tex, callback) {
+export function createCuboid(loader, tex, scl, callback) {
 	loader.load(tex, function ( texture ) {
 
 		var material = new THREE.MeshPhongMaterial({map: texture});
@@ -94,6 +94,7 @@ export function createCuboid(loader, tex, callback) {
 		  new THREE.Face3(4, 5, 1),
 		);
 		
+		geometry.scale(scl, scl, scl);
 		geometry.computeFaceNormals();
 
 		const cube = new THREE.Mesh(geometry, material);

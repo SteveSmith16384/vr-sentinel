@@ -22,17 +22,15 @@
 			import { VRButton } from './jsm/webxr/VRButton.js';
 			import { XRControllerModelFactory } from './jsm/webxr/XRControllerModelFactory.js';
 
-			import Game from './TheSentinelGame.js';
+			import { initGame, updateGame, onSelectStart, onSelectEnd } from './TheSentinelGame.js';
 
-			var clock = new THREE.Clock();
-
-			var camera, scene, raycaster, renderer;
-			var controller, controllerGrip, tempMatrix = new THREE.Matrix4();
+			var camera, scene, renderer;
+			var controller, controllerGrip;
 			var intersectedObject, intersectedPosition; // Contains the object and intersected position of where the user is pointing.
 			var floor;
 			var dolly; // The dolly contains the camera and the controller.  Move the dolly to move the camera and ontroller.
 			
-			const game = new Game();
+			//const game = new Game();
 			
 			init();
 			animate();
@@ -52,9 +50,9 @@
 				scene.add( dolly );
 
 				// Add some dummy objects to view
-				game.init(scene, dolly);
+				initGame(scene, dolly);
 		
-				raycaster = new THREE.Raycaster();
+				
 
 				renderer = new THREE.WebGLRenderer( { antialias: true } );
 				renderer.setPixelRatio( window.devicePixelRatio );
@@ -65,19 +63,17 @@
 				renderer.shadowMap.type = THREE.PCFSoftShadowMap;				
 				container.appendChild( renderer.domElement );
 
-
+/*
 				function onSelectStart() {
-//dolly.position.y += 2;
 					// Add code for when user presses their controller
 					game.onSelectStart();
 				}
 
 				function onSelectEnd() {
-//dolly.position.y += 2;
 					// Add code for when user releases the button on their controller
 					game.onSelectEnd();
 				}
-
+*/
 				controller = renderer.xr.getController( 0 );
 				controller.addEventListener( 'selectstart', onSelectStart );
 				controller.addEventListener( 'selectend', onSelectEnd );
@@ -135,29 +131,7 @@
 
 
 			function render() {
-				var delta = clock.getDelta();
-
-				// find what user is pointing at
-				tempMatrix.identity().extractRotation( controller.matrixWorld );
-				raycaster.ray.origin.setFromMatrixPosition( controller.matrixWorld );
-				raycaster.ray.direction.set( 0, 0, -1 ).applyMatrix4( tempMatrix );
-
-				var intersects = raycaster.intersectObjects(scene.children);
-
-				if (intersects.length > 0) {
-					intersectedObject = intersects[0].object;
-					intersectedPosition = intersects[0].point;
-
-					// Rotate the object to show it is selected
-					//intersectedObject.rotation.y += .1;
-					game.currentPointer(intersectedObject, intersectedPosition);
-
-				} else {
-					intersectedObject = undefined;
-				}
-				
-
-				game.update(scene, dolly);
+				updateGame(scene, dolly, controller);
 				
 				renderer.render( scene, camera );
 			}
