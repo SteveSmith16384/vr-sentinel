@@ -55,12 +55,12 @@ absorb - energy gained fom absorption
 		});
 
 		// Generate map
-		const SIZE = 20;
+		const SIZE = 40;
 		var x, y;
 		map = create2DArray(SIZE);
 		for (y=0 ; y<SIZE ; y+=2) {
 			for (x=0 ; x<SIZE ; x+=2) {
-				var rnd = getRandomInt(0, 3);
+				var rnd = getRandomInt(0, 6);
 				map[x][y] = rnd;
 				map[x+1][y] = rnd;
 				map[x][y+1] = rnd;
@@ -76,6 +76,12 @@ absorb - energy gained fom absorption
 				entities.add(plane);
 			}
 		}
+		
+		// Set player start position
+		dolly.position.x = 0;
+		dolly.position.y = map[0][0];
+		dolly.position.z = 0;
+
 
 		//this.text = createText("HELLO!");
 		//this.text.position.set(0, 2, -5);
@@ -84,16 +90,11 @@ absorb - energy gained fom absorption
 	
 
 	function currentPointer(object, point) {
-		//console.log('here1');
 		selectedObject = object;
 		if (object != undefined) {
-			//console.log('here2');
-
 			selectedPoint = point;
 			//object.material.color.setHex(0xff0000);
-
 			if (highlight != undefined) {
-		console.log('here3');
 				highlight.position.x = point.x;
 				highlight.position.y = point.y + .1;
 				highlight.position.z = point.z;
@@ -132,7 +133,7 @@ absorb - energy gained fom absorption
 		var intersects = raycaster.intersectObjects(entities.children);
 
 		if (intersects.length > 0) {
-			//console.log("Intersdected!");
+			//console.log("Intersected!");
 			//intersectedObject = intersects[0].object;
 			//intersectedPosition = intersects[0].point;
 
