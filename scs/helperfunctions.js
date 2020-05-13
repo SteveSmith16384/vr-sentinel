@@ -102,7 +102,7 @@ export function createCuboid(loader, tex, callback) {
 
 }
 
-
+/*
 export function createPlane_WORKS(loader, tex, callback) {
 	loader.load(tex, function ( texture ) {
 		var material = new THREE.MeshBasicMaterial({map: texture});
@@ -129,7 +129,7 @@ export function createPlane_WORKS(loader, tex, callback) {
 	});
 
 }
-
+*/
 
 export function createPlane_NoTex(h1, h2, h3, h4) {
 	var material = new THREE.MeshPhongMaterial({color: 0xffffff });

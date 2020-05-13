@@ -1,7 +1,6 @@
 import * as THREE from './build/three.module.js';
-import { createBillboard, createText } from './scs/helperfunctions.js';
-//import { createScenery } from './scs/3ddeathchase.js';
-//import { createScenery } from './scs/dizzy.js';
+//import { createBillboard, createText } from './scs/helperfunctions.js';
+import { createScenery } from './scs/thesentinel.js';
 
 
 /*
@@ -16,37 +15,30 @@ export default class Game {
     constructor() {
 		this.scene;
 		this.loader = undefined; // Texture loader
-		//this.entities = undefined;
 		
-		this.text = undefined;
-		this.textObject = undefined;
+		this.selectedObject;
 	}
 	
 
 	currentPointer(object, point) {
-		objectPointedAt(object, point);
-		/*
-		if (object == undefined) {
-			if (this.text != undefined) {
-				this.scene.remove(this.text);
-				this.text = undefined;
-			}
-		} else if (object != this.textObject) {
-			this.textObject = object;
-			if (this.text != undefined) {
-				this.scene.remove(this.text);
-			}
-			if (object.components != undefined && object.components["text"] != undefined) {
-				this.text = createText(object.components["text"]);
-				this.text.position.set(0, 2, -5);
-				this.scene.add(this.text);
-			}
-		}*/
+		this.selectedObject = object;
+		if (object != undefined) {
+			object.material.color.setHex(0xff0000);
+		}
 	}
 	
 	
 	onSelectStart() {
-		// Add code for when user presses their controller
+		if (this.selectedObject != undefined) {
+			console.log("this.selectedObject.position=" + this.selectedObject.position);
+			console.log("this.selectedObject.position.x=" + this.selectedObject.position.x);
+			console.log("this.selectedObject.position.z=" + this.selectedObject.position.z);
+			//this.dolly.position.set(this.selectedObject.position);
+			this.dolly.position.x = this.selectedObject.position.x;
+			this.dolly.position.y = this.selectedObject.position.y + 1;
+			this.dolly.position.z = this.selectedObject.position.z;
+			//this.dolly.position.y += 12;
+		}
 	}
 
 	
@@ -55,8 +47,9 @@ export default class Game {
 	}
 
 
-	init(scene) {
+	init(scene, dolly) {
 		this.scene = scene;
+		this.dolly = dolly;
 		this.loader = new THREE.TextureLoader();
 		this.entities = new THREE.Group();
 		
@@ -69,7 +62,7 @@ export default class Game {
 	
 
 	update(scene, dolly) {
-		var s;
+/*		var s;
 		
 		for (s of scene.children) {
 			if (s.components) {
@@ -79,7 +72,7 @@ export default class Game {
 				}
 			}
 		}
+*/
 	}
-
 }
 
