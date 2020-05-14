@@ -11,7 +11,7 @@ ECS Components:-
 face - Always face the camera
 text - Text to show if player pointing at it.
 absorb - energy gained fom absorption
-//land - can be landed on
+land - can be landed on
 
 
 */
@@ -60,7 +60,7 @@ absorb - energy gained fom absorption
 		map = create2DArray(SIZE); // Array of heights of corners of each plane
 		for (y=0 ; y<SIZE-1 ; y+=2) {
 			for (x=0 ; x<SIZE-1 ; x+=2) {
-				var rnd = getRandomInt(0, 1);
+				var rnd = 0;//getRandomInt(0, 5);
 				map[x][y] = rnd;
 				map[x+1][y] = rnd;
 				map[x][y+1] = rnd;
@@ -68,21 +68,15 @@ absorb - energy gained fom absorption
 			}
 		}
 
-// todo =- remove
-				map[0][0] = 1;
-				map[1][0] = 1;
-				map[0][1] = 1;
-				map[1][1] = 1;
-
-
 		var mapent = createMap(map, SIZE);
-		mapent.position.y = -1;
-		mapent.position.z = -SIZE;
+		mapent.components = {};
+		mapent.components.land = true;
+		//mapent.position.y = -1;
+		//mapent.position.z = -SIZE;
 		entities.add(mapent);
 
 		/*
-		
-
+		// Slow way to draw map
 		for (y=0 ; y<SIZE-1 ; y++) {
 			for (x=0 ; x<SIZE-1 ; x++) {
 				var plane = createPlane_NoTex(map[x][y], map[x+1][y], map[x][y+1], map[x+1][y+1]);
@@ -93,6 +87,21 @@ absorb - energy gained fom absorption
 			}
 		}
 		*/
+		
+		// Add cubes to absorb
+		var cube = createCuboid(loader, 'textures/thesentinel/lavatile.jpg', .9, function(cube) {
+			var x = getRandomInt(1, SIZE-2);
+			var z = getRandomInt(1, SIZE-2);
+			cube.position.x = x;
+			cube.position.y = map[x][z]+1;
+			cube.position.z = z;
+			
+			cube.components = {};
+			cube.components.absorb = 1;
+			entities.add(cube);
+		});
+
+
 		
 		// Set player start position
 		dolly.position.x = 0;
@@ -123,13 +132,21 @@ absorb - energy gained fom absorption
 	export function onSelectStart() {
 		//console.log('onSelectStart()');
 		if (selectedObject != undefined) {
-			//console.log("this.selectedObject.position=" + selectedObject.position);
-			//console.log("this.selectedObject.position.x=" + selectedObject.position.x);
-			//console.log("this.selectedObject.position.z=" + selectedObject.position.z);
-
-			dolly.position.x = selectedPoint.x;
-			dolly.position.y = selectedPoint.y + .1;
-			dolly.position.z = selectedPoint.z;
+			var s = selectedObject;
+			if (s.components) {
+			console.log("Has components!");
+				if (s.components.absorb != undefined) {
+			console.log("Absorbed!");
+					entities.remove(s);
+				}
+				if (s.components.land != undefined) {
+					dolly.position.x = selectedPoint.x;
+					dolly.position.y = selectedPoint.y + .1;
+					dolly.position.z = selectedPoint.z;
+				}
+			}
+		} else {
+			console.log("Undefined!");
 		}
 	}
 
