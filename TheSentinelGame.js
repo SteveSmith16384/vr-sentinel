@@ -60,7 +60,7 @@ land - can be landed on
 		map = create2DArray(SIZE); // Array of heights of corners of each plane
 		for (y=0 ; y<SIZE-1 ; y+=2) {
 			for (x=0 ; x<SIZE-1 ; x+=2) {
-				var rnd = 0;//getRandomInt(0, 5);
+				var rnd = getRandomInt(0, 2);
 				map[x][y] = rnd;
 				map[x+1][y] = rnd;
 				map[x][y+1] = rnd;
@@ -89,18 +89,19 @@ land - can be landed on
 		*/
 		
 		// Add cubes to absorb
-		var cube = createCuboid(loader, 'textures/thesentinel/lavatile.jpg', .9, function(cube) {
-			var x = getRandomInt(1, SIZE-2);
-			var z = getRandomInt(1, SIZE-2);
-			cube.position.x = x;
-			cube.position.y = map[x][z]+1;
-			cube.position.z = z;
-			
-			cube.components = {};
-			cube.components.absorb = 1;
-			entities.add(cube);
-		});
-
+		for (var i=0 ; i<20 ; i++) {
+			var cube = createCuboid(loader, 'textures/thesentinel/lavatile.jpg', .45, function(cube) {
+				var x = getRandomInt(1, SIZE-2);
+				var z = getRandomInt(1, SIZE-2);
+				cube.position.x = x;
+				cube.position.y = map[x][z]+1;
+				cube.position.z = z;
+				
+				cube.components = {};
+				cube.components.absorb = 1;
+				entities.add(cube);
+			});
+		}
 
 		
 		// Set player start position
@@ -134,9 +135,9 @@ land - can be landed on
 		if (selectedObject != undefined) {
 			var s = selectedObject;
 			if (s.components) {
-			console.log("Has components!");
+			//console.log("Has components!");
 				if (s.components.absorb != undefined) {
-			console.log("Absorbed!");
+			//console.log("Absorbed!");
 					entities.remove(s);
 				}
 				if (s.components.land != undefined) {
