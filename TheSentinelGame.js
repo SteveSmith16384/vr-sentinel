@@ -1,6 +1,6 @@
 import * as THREE from './build/three.module.js';
 //import { createBillboard, createText } from './scs/helperfunctions.js';
-//import { createScenery } from './scs/thesentinel.js';
+import { createMap } from './scs/thesentinel.js';
 import { create2DArray } from './scs/collections.js';
 import { getRandomInt } from './scs/numberfunctions.js';
 import { createBillboard, createPlane_NoTex, createCuboid } from './scs/helperfunctions.js';
@@ -57,16 +57,32 @@ absorb - energy gained fom absorption
 		// Generate map
 		const SIZE = 40;
 		var x, y;
-		map = create2DArray(SIZE);
-		for (y=0 ; y<SIZE ; y+=2) {
-			for (x=0 ; x<SIZE ; x+=2) {
-				var rnd = getRandomInt(0, 6);
+		map = create2DArray(SIZE); // Array of heights of corners of each plane
+		for (y=0 ; y<SIZE-1 ; y+=2) {
+			for (x=0 ; x<SIZE-1 ; x+=2) {
+				var rnd = getRandomInt(0, 1);
 				map[x][y] = rnd;
 				map[x+1][y] = rnd;
 				map[x][y+1] = rnd;
 				map[x+1][y+1] = rnd;
 			}
 		}
+
+// todo =- remove
+				map[0][0] = 1;
+				map[1][0] = 1;
+				map[0][1] = 1;
+				map[1][1] = 1;
+
+
+		var mapent = createMap(map, SIZE);
+		mapent.position.y = -1;
+		mapent.position.z = -SIZE;
+		entities.add(mapent);
+
+		/*
+		
+
 		for (y=0 ; y<SIZE-1 ; y++) {
 			for (x=0 ; x<SIZE-1 ; x++) {
 				var plane = createPlane_NoTex(map[x][y], map[x+1][y], map[x][y+1], map[x+1][y+1]);
@@ -76,6 +92,7 @@ absorb - energy gained fom absorption
 				entities.add(plane);
 			}
 		}
+		*/
 		
 		// Set player start position
 		dolly.position.x = 0;
@@ -110,9 +127,9 @@ absorb - energy gained fom absorption
 			//console.log("this.selectedObject.position.x=" + selectedObject.position.x);
 			//console.log("this.selectedObject.position.z=" + selectedObject.position.z);
 
-			dolly.position.x = selectedObject.position.x;
+			dolly.position.x = selectedPoint.x;
 			dolly.position.y = selectedPoint.y + .1;
-			dolly.position.z = selectedObject.position.z;
+			dolly.position.z = selectedPoint.z;
 		}
 	}
 
