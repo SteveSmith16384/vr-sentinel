@@ -27,11 +27,12 @@ land - can be landed on
 	var selectedPoint;
 	
 	var highlight = undefined;
-	var sentinel;
+	var sentinel = undefined;
 	
 	var tempMatrix = new THREE.Matrix4();
 	var raycaster = new THREE.Raycaster();
 	const clock = new THREE.Clock();
+	var directionalLight;
 
 	export function initGame(_scene, _dolly) {
 		scene = _scene;
@@ -42,13 +43,13 @@ land - can be landed on
 		entities = new THREE.Group();
 		scene.add(entities);
 		
-		scene.add( new THREE.HemisphereLight( 0x606060, 0x404040 ) );
+		scene.add( new THREE.HemisphereLight( 0x303030, 0x101010 ) );
 
-		var light = new THREE.DirectionalLight( 0x00ff00, 1, 100 );
-		light.position.set( 0, 1, 0 );
-		light.target.position.set( 0, 0, 0 );
-		light.castShadow = true;
-		scene.add( light );
+		directionalLight = new THREE.DirectionalLight( 0x00ff00, 1, 100 );
+		directionalLight.position.set( 0, 1, 0 );
+		directionalLight.target.position.set( 0, 0, 0 );
+		directionalLight.castShadow = true;
+		scene.add( directionalLight );
 
 		scene.background = new THREE.Color( 0x666666 );
 
@@ -117,10 +118,10 @@ land - can be landed on
 		}
 		
 		// Sentinel
-		sentinel = createCuboid(loader, 'textures/thesentinel/lavatile.jpg', .5, function(cube) {
+		createCuboid(loader, 'textures/thesentinel/lavatile.jpg', 1, function(cube) {
 			var x = getRandomInt(2, SIZE-3)+.5;
 			var z = getRandomInt(2, SIZE-3)+.5;
-			cube.scale(.5, 2, .5);
+			//cube.scale(1, 3, 1);
 
 			var height = getHeightAtMapPoint(x, z)
 			cube.position.x = x;
@@ -129,17 +130,17 @@ land - can be landed on
 			
 			cube.components = {};
 			entities.add(cube);
+			sentinel = cube;
 		});
 
 		
 		// Set player start position
-			var x = getRandomInt(2, SIZE-3)+.5;
-			var z = getRandomInt(2, SIZE-3)+.5;
-			var height = getHeightAtMapPoint(x, z)
+		var x = getRandomInt(2, SIZE-3)+.5;
+		var z = getRandomInt(2, SIZE-3)+.5;
+		var height = getHeightAtMapPoint(x, z)
 		dolly.position.x = x;
 		dolly.position.y = height;
 		dolly.position.z = z;
-
 
 		//this.text = createText("HELLO!");
 		//this.text.position.set(0, 2, -5);
@@ -199,18 +200,27 @@ land - can be landed on
 		var intersects = raycaster.intersectObjects(entities.children);
 
 		if (intersects.length > 0) {
-			//console.log("Intersected!");
-			//intersectedObject = intersects[0].object;
-			//intersectedPosition = intersects[0].point;
-
 			// Rotate the object to show it is selected
 			//intersectedObject.rotation.y += .1;
 			currentPointer(intersects[0].object, intersects[0].point);
-
 		} else {
 			//intersectedObject = undefined;
 		}
 				
+		if (sentinel != undefined) {
+			sentinel.rotation.y += .3 * delta;
+			if (sentinel.rotation.y > Math.PI) {
+				sentinel.rotation.y -= Math.PI;
+			}
+			var angle = getAngleFromSentinelToPlayer();
+			//console.log("ang=" + angle);
+			if (Math.abs(angle - sentinel.rotation.y) < Math.PI / 6) {
+				//console.log("Can See!");
+				directionalLight.color.setHex(0xff0000);
+			} else {
+				directionalLight.color.setHex(0x00ff00);
+			}
+		}
 
 /*		var s;
 		
@@ -226,14 +236,15 @@ land - can be landed on
 	}
 //}
 
+	function getAngleFromSentinelToPlayer() {
+		var z = dolly.position.z - sentinel.position.z;
+		var x = dolly.position.x - sentinel.position.x;
+		var diff = z/x;
+		return Math.tan(diff);
+	}
+	
 
 	function getHeightAtMapPoint(x, z) {
-//console.log("ray:" + x + "," + z);
-		
-		//var ray = new THREE.Ray();
-		//raycaster.ray.origin.setFromMatrixPosition( controller.matrixWorld );
-		//raycaster.ray.direction.set( 0, 0, -1 ).applyMatrix4( tempMatrix );
-
 		raycaster.ray.origin.x = x;
 		raycaster.ray.origin.y = 1000;
 		raycaster.ray.origin.z = z;
@@ -241,12 +252,7 @@ land - can be landed on
 
 		var intersects = raycaster.intersectObjects(entities.children);
 
-//		if (intersects[0] != undefined) {
 		return intersects[0].point.y;
-//		} else {
-//console.log("undefined!");
-//		}
-
 	}
 	
 	
