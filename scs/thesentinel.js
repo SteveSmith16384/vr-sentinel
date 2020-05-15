@@ -12,7 +12,17 @@ export function createMap(map, SIZE) {
 			for (x=0 ; x<SIZE-1 ; x++) {
 				var geometry = new THREE.Geometry();
 				geometry.vertices.push(
-				  new THREE.Vector3(x-.5, -1, z+.5),  // 0
+				  new THREE.Vector3(x, -1, z+1),  // 0
+				  new THREE.Vector3(x+1, -1, z+1),  // 1
+				  new THREE.Vector3(x, map[x][z+1], z+1),  // 2
+				  new THREE.Vector3(x+1, map[x+1][z+1], z+1),  // 3
+				  new THREE.Vector3(x, -1, z),  // 4
+				  new THREE.Vector3(x+1, -1, z),  // 5
+				  new THREE.Vector3(x, map[x][z], z),  // 6
+				  new THREE.Vector3(x+1, map[x+1][z], z),  // 7
+				  
+				  /*
+				  				  new THREE.Vector3(x-.5, -1, z+.5),  // 0
 				  new THREE.Vector3(x+.5, -1, z+.5),  // 1
 				  new THREE.Vector3(x-.5, map[x][z+1], z+.5),  // 2
 				  new THREE.Vector3(x+.5, map[x+1][z+1], z+.5),  // 3
@@ -20,6 +30,8 @@ export function createMap(map, SIZE) {
 				  new THREE.Vector3(x+.5, -1, z-.5),  // 5
 				  new THREE.Vector3(x-.5, map[x][z], z-.5),  // 6
 				  new THREE.Vector3(x+.5, map[x+1][z], z-.5),  // 7
+
+*/
 				);
 
 				geometry.faces.push(
@@ -33,7 +45,7 @@ export function createMap(map, SIZE) {
 			}
 		}
 		
-		//geom.mergeVertices(); // optional
+		geom.mergeVertices(); // optional
 		geom.computeFaceNormals();
 		var end = new THREE.Mesh(geom, material);
 		return end;

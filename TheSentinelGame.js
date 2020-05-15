@@ -27,6 +27,7 @@ land - can be landed on
 	var selectedPoint;
 	
 	var highlight = undefined;
+	var sentinel;
 	
 	var tempMatrix = new THREE.Matrix4();
 	var raycaster = new THREE.Raycaster();
@@ -41,6 +42,8 @@ land - can be landed on
 		entities = new THREE.Group();
 		scene.add(entities);
 		
+		scene.add( new THREE.HemisphereLight( 0x606060, 0x404040 ) );
+
 		var light = new THREE.DirectionalLight( 0x00ff00, 1, 100 );
 		light.position.set( 0, 1, 0 );
 		light.target.position.set( 0, 0, 0 );
@@ -87,14 +90,24 @@ land - can be landed on
 			}
 		}
 		*/
-		
+
+/*		
+		// Test rays
+		for (var i=2 ; i<20 ; i++) {
+				var x = i;//getRandomInt(1, SIZE-2);
+				var z = i//getRandomInt(1, SIZE-2);
+				var height = getHeightAtMapPoint(x, z)
+		}
+	*/	
+
 		// Add cubes to absorb
 		for (var i=0 ; i<20 ; i++) {
 			var cube = createCuboid(loader, 'textures/thesentinel/lavatile.jpg', .45, function(cube) {
-				var x = getRandomInt(1, SIZE-2);
-				var z = getRandomInt(1, SIZE-2);
+				var x = getRandomInt(2, SIZE-3)+.5;
+				var z = getRandomInt(2, SIZE-3)+.5;
+				var height = getHeightAtMapPoint(x, z)
 				cube.position.x = x;
-				cube.position.y = map[x][z]+1;
+				cube.position.y = height+.5;//map[x][z]+1;
 				cube.position.z = z;
 				
 				cube.components = {};
@@ -102,12 +115,30 @@ land - can be landed on
 				entities.add(cube);
 			});
 		}
+		
+		// Sentinel
+		sentinel = createCuboid(loader, 'textures/thesentinel/lavatile.jpg', .5, function(cube) {
+			var x = getRandomInt(2, SIZE-3)+.5;
+			var z = getRandomInt(2, SIZE-3)+.5;
+			cube.scale(.5, 2, .5);
+
+			var height = getHeightAtMapPoint(x, z)
+			cube.position.x = x;
+			cube.position.y = height+5;
+			cube.position.z = z;
+			
+			cube.components = {};
+			entities.add(cube);
+		});
 
 		
 		// Set player start position
-		dolly.position.x = 0;
-		dolly.position.y = map[0][0];
-		dolly.position.z = 0;
+			var x = getRandomInt(2, SIZE-3)+.5;
+			var z = getRandomInt(2, SIZE-3)+.5;
+			var height = getHeightAtMapPoint(x, z)
+		dolly.position.x = x;
+		dolly.position.y = height;
+		dolly.position.z = z;
 
 
 		//this.text = createText("HELLO!");
@@ -195,3 +226,27 @@ land - can be landed on
 	}
 //}
 
+
+	function getHeightAtMapPoint(x, z) {
+//console.log("ray:" + x + "," + z);
+		
+		//var ray = new THREE.Ray();
+		//raycaster.ray.origin.setFromMatrixPosition( controller.matrixWorld );
+		//raycaster.ray.direction.set( 0, 0, -1 ).applyMatrix4( tempMatrix );
+
+		raycaster.ray.origin.x = x;
+		raycaster.ray.origin.y = 1000;
+		raycaster.ray.origin.z = z;
+		raycaster.ray.direction.set( 0, -1, 0 );
+
+		var intersects = raycaster.intersectObjects(entities.children);
+
+//		if (intersects[0] != undefined) {
+		return intersects[0].point.y;
+//		} else {
+//console.log("undefined!");
+//		}
+
+	}
+	
+	
