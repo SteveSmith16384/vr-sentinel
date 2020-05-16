@@ -53,8 +53,9 @@ land - can be landed on
 
 		scene.background = new THREE.Color( 0x666666 );
 
-		createCuboid(loader, 'textures/thesentinel/lavatile.jpg', .2, function(cube) {
+		createCuboid(loader, 'textures/thesentinel/lavatile.jpg', .1, function(cube) {
 			highlight = cube;
+			highlight.name = "highlight";
 			scene.add(cube);
 		});
 
@@ -80,7 +81,7 @@ land - can be landed on
 		entities.add(mapent);
 
 		/*
-		// Slow way to draw map
+		// Slow way to create a map that is slow to draw
 		for (y=0 ; y<SIZE-1 ; y++) {
 			for (x=0 ; x<SIZE-1 ; x++) {
 				var plane = createPlane_NoTex(map[x][y], map[x+1][y], map[x][y+1], map[x+1][y+1]);
@@ -100,10 +101,10 @@ land - can be landed on
 				var height = getHeightAtMapPoint(x, z)
 		}
 	*/	
-
+/*
 		// Add cubes to absorb
 		for (var i=0 ; i<20 ; i++) {
-			var cube = createCuboid(loader, 'textures/thesentinel/lavatile.jpg', .45, function(cube) {
+			createCuboid(loader, 'textures/thesentinel/lavatile.jpg', .45, function(cube) {
 				var x = getRandomInt(2, SIZE-3)+.5;
 				var z = getRandomInt(2, SIZE-3)+.5;
 				var height = getHeightAtMapPoint(x, z)
@@ -113,10 +114,12 @@ land - can be landed on
 				
 				cube.components = {};
 				cube.components.absorb = 1;
+				
+				cube.name = "Cube";
 				entities.add(cube);
 			});
 		}
-		
+		*/
 		// Sentinel
 		createCuboid(loader, 'textures/thesentinel/lavatile.jpg', 1, function(cube) {
 			var x = getRandomInt(2, SIZE-3)+.5;
@@ -125,11 +128,12 @@ land - can be landed on
 
 			var height = getHeightAtMapPoint(x, z)
 			cube.position.x = x;
-			cube.position.y = height+5;
+			cube.position.y = height+7;
 			cube.position.z = z;
 			
 			cube.components = {};
 			entities.add(cube);
+			cube.name = "Sentinel";
 			sentinel = cube;
 		});
 
@@ -167,9 +171,9 @@ land - can be landed on
 		if (selectedObject != undefined) {
 			var s = selectedObject;
 			if (s.components) {
-			//console.log("Has components!");
+				//console.log("Has components!");
 				if (s.components.absorb != undefined) {
-			//console.log("Absorbed!");
+					//console.log("Absorbed!");
 					entities.remove(s);
 				}
 				if (s.components.land != undefined) {
@@ -196,7 +200,7 @@ land - can be landed on
 		tempMatrix.identity().extractRotation( controller.matrixWorld );
 		raycaster.ray.origin.setFromMatrixPosition( controller.matrixWorld );
 		raycaster.ray.direction.set( 0, 0, -1 ).applyMatrix4( tempMatrix );
-
+		//raycaster.far = Math.Infinity;
 		var intersects = raycaster.intersectObjects(entities.children);
 
 		if (intersects.length > 0) {
@@ -214,12 +218,37 @@ land - can be landed on
 			}
 			var angle = getAngleFromSentinelToPlayer();
 			//console.log("ang=" + angle);
-			if (Math.abs(angle - sentinel.rotation.y) < Math.PI / 6) {
+			directionalLight.color.setHex(0x00ff00);
+			//if (Math.abs(angle - sentinel.rotation.y) < Math.PI / 6) { todo = re-add
 				//console.log("Can See!");
-				directionalLight.color.setHex(0xff0000);
-			} else {
-				directionalLight.color.setHex(0x00ff00);
-			}
+				
+				// Can Sentinel actually see player?
+				raycaster.ray.origin.x = sentinel.position.x;
+				raycaster.ray.origin.y = sentinel.position.y;
+				raycaster.ray.origin.z = sentinel.position.z;
+				
+				var vecToPlayer = new THREE.Vector3(dolly.position.x-sentinel.position.x, dolly.position.y-sentinel.position.y, dolly.position.z-sentinel.position.z);
+				var vecNrm = new THREE.Vector3(vecToPlayer.x, vecToPlayer.y, vecToPlayer.z);
+				vecNrm.normalize();
+				
+				raycaster.ray.direction.x = vecNrm.x;
+				raycaster.ray.direction.y = vecNrm.y;
+				raycaster.ray.direction.z = vecNrm.z;
+				
+				var intersects = raycaster.intersectObjects(entities.children);
+				console.log("intersections=" + intersects.length);
+				if (intersects.length == 0) {
+					//console.log("No intersections");
+					directionalLight.color.setHex(0xff0000);
+				} else if (intersects.length > 0) {
+					//console.log("1 intersection");
+					// Length to player
+					var toPlayer = vecToPlayer.length();
+					if (intersects[0].distance > toPlayer) {
+						directionalLight.color.setHex(0x0000ff);
+					}
+				}
+			//}
 		}
 
 /*		var s;
@@ -246,9 +275,10 @@ land - can be landed on
 
 	function getHeightAtMapPoint(x, z) {
 		raycaster.ray.origin.x = x;
-		raycaster.ray.origin.y = 1000;
+		raycaster.ray.origin.y = 100;
 		raycaster.ray.origin.z = z;
 		raycaster.ray.direction.set( 0, -1, 0 );
+		//raycaster.far = Math.Infinity;
 
 		var intersects = raycaster.intersectObjects(entities.children);
 

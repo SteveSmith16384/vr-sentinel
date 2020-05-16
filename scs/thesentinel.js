@@ -40,6 +40,7 @@ export function createMap(map, SIZE) {
 				);
 
 				var cube = new THREE.Mesh(geometry, material);
+				cube.name = "Map_" + x + "_" + z;
 				geom.mergeMesh(cube);
 	
 			}
@@ -48,6 +49,7 @@ export function createMap(map, SIZE) {
 		geom.mergeVertices(); // optional
 		geom.computeFaceNormals();
 		var end = new THREE.Mesh(geom, material);
+		end.name = "Global_map";
 		return end;
 }
 
