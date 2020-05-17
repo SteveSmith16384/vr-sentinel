@@ -34,7 +34,7 @@ land - can be landed on
 	const clock = new THREE.Clock();
 	var directionalLight;
 	
-	const sentinelView = Math.PI / 6;
+	const sentinelView = Math.PI / 8;
 
 	export function initGame(_scene, _dolly) {
 		scene = _scene;
@@ -135,23 +135,6 @@ land - can be landed on
 		*/
 
 		// Sentinel
-		/*
-		createCuboid(loader, 'textures/thesentinel/lavatile.jpg', 1, function(cube) {
-			var x = getRandomInt(2, SIZE-3)+.5;
-			var z = getRandomInt(2, SIZE-3)+.5;
-			//cube.scale(1, 3, 1);
-
-			var height = getHeightAtMapPoint(x, z)
-			cube.position.x = x;
-			cube.position.y = height+7;
-			cube.position.z = z;
-			
-			cube.components = {};
-			entities.add(cube);
-			cube.name = "Sentinel";
-			sentinel = cube;
-		});*/
-
 		sentinel = new THREE.Group();
 
 		var material_front = new THREE.MeshPhongMaterial({color: 0xffffff });
@@ -176,7 +159,8 @@ land - can be landed on
 		sentinel.position.z = z;
 
 		sentinel.rotation.x = 0;
-		sentinel.rotation.y = 0;
+		sentinel.rotation.y = 0;//Math.PI * 1.75;
+		//sentinel.rotation.y = -Math.PI/2;
 		sentinel.rotation.z = 0;
 
 		sentinel.components = {};
@@ -190,7 +174,7 @@ land - can be landed on
 		var x = 0;//getRandomInt(2, SIZE-3)+.5; todo
 		var z = 0;//getRandomInt(2, SIZE-3)+.5;
 		var height = getHeightAtMapPoint(x, z)
-		dolly.position.x = x;
+		dolly.position.x = SIZE/2;//x;
 		dolly.position.y = height;
 		dolly.position.z = z;
 
@@ -248,31 +232,42 @@ land - can be landed on
 		tempMatrix.identity().extractRotation( controller.matrixWorld );
 		raycaster.ray.origin.setFromMatrixPosition( controller.matrixWorld );
 		raycaster.ray.direction.set( 0, 0, -1 ).applyMatrix4( tempMatrix );
-		//raycaster.far = Math.Infinity;
 		var intersects = raycaster.intersectObjects(entities.children);
 
 		if (intersects.length > 0) {
-			// Rotate the object to show it is selected
-			//intersectedObject.rotation.y += .1;
 			currentPointer(intersects[0].object, intersects[0].point);
 		} else {
 			//intersectedObject = undefined;
 		}
 				
 		if (sentinel != undefined) {
-			/*sentinel.rotation.y += .6 * delta;
-			if (sentinel.rotation.y > Math.PI*2) {
+			// Rotate sentinel
+			sentinel.rotation.y += .6 * delta;
+			while (sentinel.rotation.y > Math.PI) {
 				sentinel.rotation.y -= Math.PI*2;
-			}*/
+			}
+			while (sentinel.rotation.y < -Math.PI) {
+				sentinel.rotation.y += Math.PI*2;
+			}
+			console.log("sentinel.rotation.y=" + sentinel.rotation.y);
 			
-			var angleStoP = getAngleFromSentinelToPlayer();// + Math.PI/2;
-			/*if (angleStoP < 0) {
+			var angleStoP = getAngleFromSentinelToPlayer();
+			//console.log("angleStoP1=" + angleStoP);
+			while (angleStoP > Math.PI) {
+				angleStoP -= Math.PI*2;
+			}
+			while (angleStoP < -Math.PI) {
 				angleStoP += Math.PI*2;
-			}*/
-			console.log("angleStoP=" + angleStoP);
+			}
+			console.log("angleStoP2=" + angleStoP);
 
-			//const diff = Math.abs(angleStoP - sentinel.rotation.y + Math.PI/4);
-			const diff = sentinel.rotation.y - angleStoP;// + Math.PI/4;
+			let diff = -sentinel.rotation.y - angleStoP;
+			while (diff < -Math.PI) {
+				diff += Math.PI*2;
+			}
+			while (diff > Math.PI) {
+				diff -= Math.PI*2;
+			}
 			console.log("Diff = " + diff);
 			
 			directionalLight.color.setHex(0x00ff00);
@@ -281,6 +276,8 @@ land - can be landed on
 			/*sentinel.rotation.x = 0;
 			sentinel.rotation.y = -angleStoP;
 			sentinel.rotation.z = 0;*/
+			
+			//throw new Error();
 			
 			if (Math.abs(diff) < sentinelView) {
 				directionalLight.color.setHex(0xffff00);
