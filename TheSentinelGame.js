@@ -35,6 +35,7 @@ land - can be landed on
 	var directionalLight;
 	
 	const sentinelView = Math.PI / 8;
+	const SENTINEL_HEIGHT = 2;
 
 	export function initGame(_scene, _dolly) {
 		scene = _scene;
@@ -67,7 +68,7 @@ land - can be landed on
 		map = create2DArray(SIZE); // Array of heights of corners of each plane
 		for (y=0 ; y<SIZE-1 ; y+=2) {
 			for (x=0 ; x<SIZE-1 ; x+=2) {
-				var rnd = 0;//getRandomInt(0, 2);
+				var rnd = getRandomInt(0, 4);
 				map[x][y] = rnd;
 				map[x+1][y] = rnd;
 				map[x][y+1] = rnd;
@@ -78,8 +79,6 @@ land - can be landed on
 		var mapent = createMap(map, SIZE);
 		mapent.components = {};
 		mapent.components.land = true;
-		//mapent.position.y = -1;
-		//mapent.position.z = -SIZE;
 		entities.add(mapent);
 
 		/*
@@ -115,7 +114,6 @@ land - can be landed on
 	*/	
 
 		// Add cubes to absorb
-		/* todo - readd
 		for (var i=0 ; i<20 ; i++) {
 			createCuboid(loader, 'textures/thesentinel/lavatile.jpg', .45, function(cube) {
 				var x = getRandomInt(2, SIZE-3)+.5;
@@ -132,35 +130,33 @@ land - can be landed on
 				entities.add(cube);
 			});
 		}
-		*/
 
 		// Sentinel
 		sentinel = new THREE.Group();
 
 		var material_front = new THREE.MeshPhongMaterial({color: 0xffffff });
 		var cube_front = createCuboidSides(0, 0, 0, 1, 0, 0);
-		cube_front.scale(1, 3, 1);
+		cube_front.scale(.5, SENTINEL_HEIGHT*.5, .5);
 		var front = new THREE.Mesh(cube_front, material_front);
 		sentinel.add(front);
 
 		var material_rest = new THREE.MeshPhongMaterial({color: 0xff0000 });
 		var cube_rest = createCuboidSides(1, 1, 1, 0, 1, 1);
-		cube_rest.scale(1, 3, 1);
+		cube_rest.scale(.5, SENTINEL_HEIGHT*.5, .5);
 		var rest = new THREE.Mesh(cube_rest, material_rest);
 		sentinel.add(rest);		
 
-		var x = SIZE/2; // todo getRandomInt(2, SIZE-3)+.5;
-		var z = SIZE/2; // todo getRandomInt(2, SIZE-3)+.5;
+		var x = getRandomInt(2, SIZE-3)+.5;
+		var z = getRandomInt(2, SIZE-3)+.5;
 		//sentinel.scale(1, 3, 1);
 
 		var height = getHeightAtMapPoint(x, z)
 		sentinel.position.x = x;
-		sentinel.position.y = height+2; // todo - lower
+		sentinel.position.y = height+(SENTINEL_HEIGHT/2);
 		sentinel.position.z = z;
 
 		sentinel.rotation.x = 0;
-		sentinel.rotation.y = 0;//Math.PI * 1.75;
-		//sentinel.rotation.y = -Math.PI/2;
+		sentinel.rotation.y = 0;
 		sentinel.rotation.z = 0;
 
 		sentinel.components = {};
@@ -171,10 +167,10 @@ land - can be landed on
 
 		
 		// Set player start position
-		var x = 0;//getRandomInt(2, SIZE-3)+.5; todo
-		var z = 0;//getRandomInt(2, SIZE-3)+.5;
+		var x = getRandomInt(2, SIZE-3)+.5;
+		var z = getRandomInt(2, SIZE-3)+.5;
 		var height = getHeightAtMapPoint(x, z)
-		dolly.position.x = SIZE/2;//x;
+		dolly.position.x = x;
 		dolly.position.y = height;
 		dolly.position.z = z;
 
@@ -249,7 +245,7 @@ land - can be landed on
 			while (sentinel.rotation.y < -Math.PI) {
 				sentinel.rotation.y += Math.PI*2;
 			}
-			console.log("sentinel.rotation.y=" + sentinel.rotation.y);
+			//console.log("sentinel.rotation.y=" + sentinel.rotation.y);
 			
 			var angleStoP = getAngleFromSentinelToPlayer();
 			//console.log("angleStoP1=" + angleStoP);
@@ -259,7 +255,7 @@ land - can be landed on
 			while (angleStoP < -Math.PI) {
 				angleStoP += Math.PI*2;
 			}
-			console.log("angleStoP2=" + angleStoP);
+			//console.log("angleStoP2=" + angleStoP);
 
 			let diff = -sentinel.rotation.y - angleStoP;
 			while (diff < -Math.PI) {
@@ -268,7 +264,7 @@ land - can be landed on
 			while (diff > Math.PI) {
 				diff -= Math.PI*2;
 			}
-			console.log("Diff = " + diff);
+			//console.log("Diff = " + diff);
 			
 			directionalLight.color.setHex(0x00ff00);
 			
@@ -285,7 +281,7 @@ land - can be landed on
 				
 				// Can Sentinel actually see player?
 				raycaster.ray.origin.x = sentinel.position.x;
-				raycaster.ray.origin.y = sentinel.position.y;
+				raycaster.ray.origin.y = sentinel.position.y + (SENTINEL_HEIGHT/2);
 				raycaster.ray.origin.z = sentinel.position.z;
 				
 				var vecToPlayer = new THREE.Vector3(dolly.position.x-sentinel.position.x, dolly.position.y-sentinel.position.y, dolly.position.z-sentinel.position.z);
