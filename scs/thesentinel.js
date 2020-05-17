@@ -20,18 +20,6 @@ export function createMap(map, SIZE) {
 				  new THREE.Vector3(x+1, -1, z),  // 5
 				  new THREE.Vector3(x, map[x][z], z),  // 6
 				  new THREE.Vector3(x+1, map[x+1][z], z),  // 7
-				  
-				  /*
-				  				  new THREE.Vector3(x-.5, -1, z+.5),  // 0
-				  new THREE.Vector3(x+.5, -1, z+.5),  // 1
-				  new THREE.Vector3(x-.5, map[x][z+1], z+.5),  // 2
-				  new THREE.Vector3(x+.5, map[x+1][z+1], z+.5),  // 3
-				  new THREE.Vector3(x-.5, -1, z-.5),  // 4
-				  new THREE.Vector3(x+.5, -1, z-.5),  // 5
-				  new THREE.Vector3(x-.5, map[x][z], z-.5),  // 6
-				  new THREE.Vector3(x+.5, map[x+1][z], z-.5),  // 7
-
-*/
 				);
 
 				geometry.faces.push(

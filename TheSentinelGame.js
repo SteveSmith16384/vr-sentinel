@@ -3,7 +3,7 @@ import * as THREE from './build/three.module.js';
 import { createMap } from './scs/thesentinel.js';
 import { create2DArray } from './scs/collections.js';
 import { getRandomInt } from './scs/numberfunctions.js';
-import { createBillboard, createPlane_NoTex, createCuboid } from './scs/helperfunctions.js';
+import { createBillboard, createPlane_NoTex, createCuboid, createCuboidSides } from './scs/helperfunctions.js';
 
 
 /*
@@ -33,6 +33,8 @@ land - can be landed on
 	var raycaster = new THREE.Raycaster();
 	const clock = new THREE.Clock();
 	var directionalLight;
+	
+	const sentinelView = Math.PI / 6;
 
 	export function initGame(_scene, _dolly) {
 		scene = _scene;
@@ -65,7 +67,7 @@ land - can be landed on
 		map = create2DArray(SIZE); // Array of heights of corners of each plane
 		for (y=0 ; y<SIZE-1 ; y+=2) {
 			for (x=0 ; x<SIZE-1 ; x+=2) {
-				var rnd = getRandomInt(0, 2);
+				var rnd = 0;//getRandomInt(0, 2);
 				map[x][y] = rnd;
 				map[x+1][y] = rnd;
 				map[x][y+1] = rnd;
@@ -93,6 +95,16 @@ land - can be landed on
 		}
 		*/
 
+		// Tets maths
+		/*
+		console.log("1,1=" + Math.atan2(1, 1));
+		console.log("1,-1=" + Math.atan2(-1, 1));
+		console.log("-1,-1=" + Math.atan2(-1, -1));
+		console.log("-1,1=" + Math.atan2(1, -1));
+		console.log("0,1=" + Math.atan2(1, 0));
+		console.log("0,-1=" + Math.atan2(-1, 0));
+		*/
+		
 /*		
 		// Test rays
 		for (var i=2 ; i<20 ; i++) {
@@ -101,8 +113,9 @@ land - can be landed on
 				var height = getHeightAtMapPoint(x, z)
 		}
 	*/	
-/*
+
 		// Add cubes to absorb
+		/* todo - readd
 		for (var i=0 ; i<20 ; i++) {
 			createCuboid(loader, 'textures/thesentinel/lavatile.jpg', .45, function(cube) {
 				var x = getRandomInt(2, SIZE-3)+.5;
@@ -120,7 +133,9 @@ land - can be landed on
 			});
 		}
 		*/
+
 		// Sentinel
+		/*
 		createCuboid(loader, 'textures/thesentinel/lavatile.jpg', 1, function(cube) {
 			var x = getRandomInt(2, SIZE-3)+.5;
 			var z = getRandomInt(2, SIZE-3)+.5;
@@ -135,12 +150,45 @@ land - can be landed on
 			entities.add(cube);
 			cube.name = "Sentinel";
 			sentinel = cube;
-		});
+		});*/
+
+		sentinel = new THREE.Group();
+
+		var material_front = new THREE.MeshPhongMaterial({color: 0xffffff });
+		var cube_front = createCuboidSides(0, 0, 0, 1, 0, 0);
+		cube_front.scale(1, 3, 1);
+		var front = new THREE.Mesh(cube_front, material_front);
+		sentinel.add(front);
+
+		var material_rest = new THREE.MeshPhongMaterial({color: 0xff0000 });
+		var cube_rest = createCuboidSides(1, 1, 1, 0, 1, 1);
+		cube_rest.scale(1, 3, 1);
+		var rest = new THREE.Mesh(cube_rest, material_rest);
+		sentinel.add(rest);		
+
+		var x = SIZE/2; // todo getRandomInt(2, SIZE-3)+.5;
+		var z = SIZE/2; // todo getRandomInt(2, SIZE-3)+.5;
+		//sentinel.scale(1, 3, 1);
+
+		var height = getHeightAtMapPoint(x, z)
+		sentinel.position.x = x;
+		sentinel.position.y = height+2; // todo - lower
+		sentinel.position.z = z;
+
+		sentinel.rotation.x = 0;
+		sentinel.rotation.y = 0;
+		sentinel.rotation.z = 0;
+
+		sentinel.components = {};
+		entities.add(sentinel);
+		sentinel.name = "Sentinel";
+
+//---------------------
 
 		
 		// Set player start position
-		var x = getRandomInt(2, SIZE-3)+.5;
-		var z = getRandomInt(2, SIZE-3)+.5;
+		var x = 0;//getRandomInt(2, SIZE-3)+.5; todo
+		var z = 0;//getRandomInt(2, SIZE-3)+.5;
 		var height = getHeightAtMapPoint(x, z)
 		dolly.position.x = x;
 		dolly.position.y = height;
@@ -212,14 +260,30 @@ land - can be landed on
 		}
 				
 		if (sentinel != undefined) {
-			sentinel.rotation.y += .3 * delta;
-			if (sentinel.rotation.y > Math.PI) {
-				sentinel.rotation.y -= Math.PI;
-			}
-			var angle = getAngleFromSentinelToPlayer();
-			//console.log("ang=" + angle);
+			/*sentinel.rotation.y += .6 * delta;
+			if (sentinel.rotation.y > Math.PI*2) {
+				sentinel.rotation.y -= Math.PI*2;
+			}*/
+			
+			var angleStoP = getAngleFromSentinelToPlayer();// + Math.PI/2;
+			/*if (angleStoP < 0) {
+				angleStoP += Math.PI*2;
+			}*/
+			console.log("angleStoP=" + angleStoP);
+
+			//const diff = Math.abs(angleStoP - sentinel.rotation.y + Math.PI/4);
+			const diff = sentinel.rotation.y - angleStoP;// + Math.PI/4;
+			console.log("Diff = " + diff);
+			
 			directionalLight.color.setHex(0x00ff00);
-			//if (Math.abs(angle - sentinel.rotation.y) < Math.PI / 6) { todo = re-add
+			
+			// Look at player
+			/*sentinel.rotation.x = 0;
+			sentinel.rotation.y = -angleStoP;
+			sentinel.rotation.z = 0;*/
+			
+			if (Math.abs(diff) < sentinelView) {
+				directionalLight.color.setHex(0xffff00);
 				//console.log("Can See!");
 				
 				// Can Sentinel actually see player?
@@ -236,19 +300,19 @@ land - can be landed on
 				raycaster.ray.direction.z = vecNrm.z;
 				
 				var intersects = raycaster.intersectObjects(entities.children);
-				console.log("intersections=" + intersects.length);
+				//console.log("intersections=" + intersects.length);
 				if (intersects.length == 0) {
 					//console.log("No intersections");
 					directionalLight.color.setHex(0xff0000);
 				} else if (intersects.length > 0) {
 					//console.log("1 intersection");
-					// Length to player
 					var toPlayer = vecToPlayer.length();
 					if (intersects[0].distance > toPlayer) {
-						directionalLight.color.setHex(0x0000ff);
+						directionalLight.color.setHex(0xff0000);
 					}
 				}
-			//}
+			} else {
+			}
 		}
 
 /*		var s;
@@ -263,13 +327,17 @@ land - can be landed on
 		}
 */
 	}
-//}
+
 
 	function getAngleFromSentinelToPlayer() {
-		var z = dolly.position.z - sentinel.position.z;
 		var x = dolly.position.x - sentinel.position.x;
-		var diff = z/x;
-		return Math.tan(diff);
+		var z = dolly.position.z - sentinel.position.z;
+		var rads = Math.atan2(z, x);
+		/*while (rads < 0) {
+			rads += (Math.PI * 2);
+		}*/
+		
+		return rads;
 	}
 	
 
@@ -278,7 +346,6 @@ land - can be landed on
 		raycaster.ray.origin.y = 100;
 		raycaster.ray.origin.z = z;
 		raycaster.ray.direction.set( 0, -1, 0 );
-		//raycaster.far = Math.Infinity;
 
 		var intersects = raycaster.intersectObjects(entities.children);
 

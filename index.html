@@ -30,8 +30,6 @@
 			var floor;
 			var dolly; // The dolly contains the camera and the controller.  Move the dolly to move the camera and ontroller.
 			
-			//const game = new Game();
-			
 			init();
 			animate();
 
@@ -61,17 +59,6 @@
 				renderer.shadowMap.type = THREE.PCFSoftShadowMap;				
 				container.appendChild( renderer.domElement );
 
-/*
-				function onSelectStart() {
-					// Add code for when user presses their controller
-					game.onSelectStart();
-				}
-
-				function onSelectEnd() {
-					// Add code for when user releases the button on their controller
-					game.onSelectEnd();
-				}
-*/
 				controller = renderer.xr.getController( 0 );
 				controller.addEventListener( 'selectstart', onSelectStart );
 				controller.addEventListener( 'selectend', onSelectEnd );
