@@ -25,6 +25,7 @@ highlight - menu change colour when selected
 	var scene, dolly;
 	var loader = undefined; // Texture loader
 	var map = undefined;
+	var mapflat = undefined;
 	var entities = undefined; // Anything that can be selected
 	
 	var selectedObject; // The object the player has clicked on
@@ -109,6 +110,7 @@ highlight - menu change colour when selected
 		const SIZE = 40;
 		var x, y;
 		map = create2DArray(SIZE); // Array of heights of corners of each plane
+		mapflat = create2DArray(SIZE); // Array of heights of corners of each plane
 		for (y=0 ; y<SIZE-1 ; y+=2) {
 			for (x=0 ; x<SIZE-1 ; x+=2) {
 				var rnd = getRandomInt(0, 4);
@@ -116,6 +118,11 @@ highlight - menu change colour when selected
 				map[x+1][y] = rnd;
 				map[x][y+1] = rnd;
 				map[x+1][y+1] = rnd;
+				/*
+				mapflat[x][y] = 1;
+				mapflat[x+1][y] = 0;
+				mapflat[x][y+1] = 0;
+				mapflat[x+1][y+1] = 0;*/
 			}
 		}
 
@@ -246,6 +253,8 @@ highlight - menu change colour when selected
 
 				removeMenu();
 			} else {
+				var height = getHeightAtMapPoint(pointedAtPoint.x, pointedAtPoint.z);
+
 				removeMenu();
 				console.log("Clicked on object");
 				// Clicked on a world object
@@ -261,24 +270,29 @@ highlight - menu change colour when selected
 						
 					}
 					if (s.components.land != undefined && pointedAtPoint != undefined) {
-						menu_teleport.components.position.x = pointedAtPoint.x;
-						menu_teleport.components.position.y = pointedAtPoint.y;
-						menu_teleport.components.position.z = pointedAtPoint.z;
-						
-						menu_teleport.position.x = pointedAtPoint.x;
-						menu_teleport.position.y = pointedAtPoint.y + .6;
-						menu_teleport.position.z = pointedAtPoint.z;
-						entities.add(menu_teleport);
+						// Check we can see the top
+						if (height-1 <= dolly.position.y) {
+							menu_teleport.components.position.x = pointedAtPoint.x;
+							menu_teleport.components.position.z = pointedAtPoint.z;
+							menu_teleport.components.position.y = height;
+							menu_teleport.position.x = pointedAtPoint.x;
+							menu_teleport.position.y = pointedAtPoint.y + .6;
+							menu_teleport.position.z = pointedAtPoint.z;
+							entities.add(menu_teleport);
+						}
 					}
 					if (s.components.build != undefined && pointedAtPoint != undefined) {
-						menu_build_cube.components.position.x = pointedAtPoint.x;
-						menu_build_cube.components.position.y = pointedAtPoint.y;
-						menu_build_cube.components.position.z = pointedAtPoint.z;
-						
-						menu_build_cube.position.x = pointedAtPoint.x;
-						menu_build_cube.position.y = pointedAtPoint.y + .9;
-						menu_build_cube.position.z = pointedAtPoint.z;
-						entities.add(menu_build_cube);
+						// Check we can see the top
+						if (height-1 <= dolly.position.y) {
+							menu_build_cube.components.position.x = pointedAtPoint.x;
+							menu_build_cube.components.position.y = pointedAtPoint.y;
+							menu_build_cube.components.position.z = pointedAtPoint.z;
+							
+							menu_build_cube.position.x = pointedAtPoint.x;
+							menu_build_cube.position.y = pointedAtPoint.y + .9;
+							menu_build_cube.position.z = pointedAtPoint.z;
+							entities.add(menu_build_cube);
+						}
 					}
 				}
 			}
