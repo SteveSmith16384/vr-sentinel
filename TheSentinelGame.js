@@ -246,17 +246,6 @@ text_test.position.z = dolly.position.z+2;
 				if (s.components) {
 					//console.log("Has components!");
 					if (s.components.absorb != undefined) {
-// todo  delete
-/*menu_teleport.position.x = dolly.position.x+2;
-menu_teleport.position.y = dolly.position.y+1.5;
-menu_teleport.position.z = dolly.position.z+2;
-entities.add(menu_teleport);
-
-menu_build_cube.position.x = s.position.x;
-menu_build_cube.position.y = s.position.y+1.5;
-menu_build_cube.position.z = s.position.z;
-entities.add(menu_build_cube);*/
-
 						menu_absorb.components.object = selectedObject;
 						menu_absorb.position.x = pointedAtPoint.x;
 						menu_absorb.position.y = pointedAtPoint.y + .3;
@@ -269,9 +258,6 @@ entities.add(menu_build_cube);*/
 						menu_teleport.components.position.y = pointedAtPoint.y;
 						menu_teleport.components.position.z = pointedAtPoint.z;
 						
-						//menu_teleport.position.x = s.position.x;
-						//menu_teleport.position.y = s.position.y+1.5;
-						//menu_teleport.position.z = s.position.z;
 						menu_teleport.position.x = pointedAtPoint.x;
 						menu_teleport.position.y = pointedAtPoint.y + .6;
 						menu_teleport.position.z = pointedAtPoint.z;
@@ -283,7 +269,7 @@ entities.add(menu_build_cube);*/
 						menu_build_cube.components.position.z = pointedAtPoint.z;
 						
 						menu_build_cube.position.x = pointedAtPoint.x;
-						menu_build_cube.position.y = pointedAtPoint.y + 9;
+						menu_build_cube.position.y = pointedAtPoint.y + .9;
 						menu_build_cube.position.z = pointedAtPoint.z;
 						entities.add(menu_build_cube);
 					}
