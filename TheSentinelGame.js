@@ -147,23 +147,17 @@ highlight - menu change colour when selected
 
 		// Add cubes to absorb
 		for (var i=0 ; i<20 ; i++) {
-			//createCuboid(loader, 'textures/thesentinel/lavatile.jpg', .45, function(cube) {
 			createCube(loader, function(cube) {
-				/*cube.components = {};
-				cube.components.absorb = 1;
-				cube.components.land = 1;
-				cube.components.build = 1;
-				
-				cube.name = "Cube";*/
-
 				var x = getRandomInt(2, SIZE-3)+.5;
 				var z = getRandomInt(2, SIZE-3)+.5;
-				var height = getHeightAtMapPoint(x, z)
-				cube.position.x = x;
-				cube.position.y = height+.5;//map[x][z]+1;
-				cube.position.z = z;
+				if (isMapFlat(x, z)) {
+					var height = getHeightAtMapPoint(x, z)
+					cube.position.x = x;
+					cube.position.y = height+.5;//map[x][z]+1;
+					cube.position.z = z;
 
-				entities.add(cube);
+					entities.add(cube);
+				}
 			});
 		}
 
@@ -272,6 +266,7 @@ highlight - menu change colour when selected
 					if (s.components.land != undefined && pointedAtPoint != undefined) {
 						// Check we can see the top
 						if (height-1 <= dolly.position.y) {
+							if (isMapFlat(pointedAtPoint.x, pointedAtPoint.z)) {
 							menu_teleport.components.position.x = pointedAtPoint.x;
 							menu_teleport.components.position.z = pointedAtPoint.z;
 							menu_teleport.components.position.y = height;
@@ -280,10 +275,12 @@ highlight - menu change colour when selected
 							menu_teleport.position.z = pointedAtPoint.z;
 							entities.add(menu_teleport);
 						}
+						}
 					}
 					if (s.components.build != undefined && pointedAtPoint != undefined) {
 						// Check we can see the top
 						if (height-1 <= dolly.position.y) {
+							if (isMapFlat(pointedAtPoint.x, pointedAtPoint.z)) {
 							menu_build_cube.components.position.x = pointedAtPoint.x;
 							menu_build_cube.components.position.y = pointedAtPoint.y;
 							menu_build_cube.components.position.z = pointedAtPoint.z;
@@ -292,6 +289,7 @@ highlight - menu change colour when selected
 							menu_build_cube.position.y = pointedAtPoint.y + .9;
 							menu_build_cube.position.z = pointedAtPoint.z;
 							entities.add(menu_build_cube);
+							}
 						}
 					}
 				}
@@ -442,6 +440,30 @@ highlight - menu change colour when selected
 		var intersects = raycaster.intersectObjects(entities.children);
 
 		return intersects[0].point.y;
+	}
+	
+	function isMapFlat(x, z) {
+		var x1 = Math.floor(x) + .2;
+		var z1 = Math.floor(z) + .2;
+		//console.log(x1 + "_" + z1);
+		raycaster.ray.origin.x = x1;
+		raycaster.ray.origin.y = 100;
+		raycaster.ray.origin.z = z1;
+		raycaster.ray.direction.set( 0, -1, 0 );
+		var intersects = raycaster.intersectObjects(entities.children);
+		var height1 = intersects[0].point.y;
+
+		x1 = Math.floor(x) + .8;
+		z1 = Math.floor(z) + .8;
+		raycaster.ray.origin.x = x1;
+		raycaster.ray.origin.z = z1;
+		//raycaster.ray.direction.set( 0, -1, 0 );
+
+		intersects = raycaster.intersectObjects(entities.children);
+
+		var height2 = intersects[0].point.y;
+		
+		return height1 == height2;
 	}
 	
 	
