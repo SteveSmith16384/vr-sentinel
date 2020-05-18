@@ -235,8 +235,8 @@ highlight - menu change colour when selected
 				removeMenu();
 			} else if (s == menu_build_cube) {
 				createCube(loader, function(cube) {
-					var x = pointedAtPoint.x;
-					var z = pointedAtPoint.z;
+					var x = Math.floor(menu_build_cube.components.position.x) + .5;
+					var z = Math.floor(menu_build_cube.components.position.z) + .5;
 					var height = getHeightAtMapPoint(x, z)
 					cube.position.x = x;
 					cube.position.y = height + .5;
