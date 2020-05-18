@@ -3,7 +3,7 @@ import * as THREE from './build/three.module.js';
 import { createMap } from './scs/thesentinel.js';
 import { create2DArray } from './scs/collections.js';
 import { getRandomInt } from './scs/numberfunctions.js';
-import { createBillboard, createPlane_NoTex, createCuboid, createCuboidSides } from './scs/helperfunctions.js';
+import { createBillboard, createPlane_NoTex, createCuboid, createCuboidSides, createText } from './scs/helperfunctions.js';
 
 
 /*
@@ -12,8 +12,7 @@ face - Always face the camera
 text - Text to show if player pointing at it.
 absorb - energy gained fom absorption
 land - can be landed on
-
-
+build - can build on
 */
 
 
@@ -23,8 +22,10 @@ land - can be landed on
 	var map = undefined;
 	var entities = undefined; // Anything that can be selected
 	
-	var selectedObject;
-	var selectedPoint;
+	var selectedObject; // The object the player has clicked on
+	//var selectedPoint = new THREE.3();;
+	var pointedAtObject; // The object the player is pointing at
+	var pointedAtPoint; // Where the player is currently pointing
 	
 	var highlight = undefined;
 	var sentinel = undefined;
@@ -36,6 +37,11 @@ land - can be landed on
 	
 	const sentinelView = Math.PI / 8;
 	const SENTINEL_HEIGHT = 2;
+	
+	var menu_absorb;
+	var menu_build_cube;
+	var menu_teleport;
+	var text_test;
 
 	export function initGame(_scene, _dolly) {
 		scene = _scene;
@@ -56,6 +62,42 @@ land - can be landed on
 
 		scene.background = new THREE.Color( 0x666666 );
 
+		// Create menu items
+		/*
+		createBillboard(scene, loader, 'textures/dizzy3/barrel.png', 2, 2, function(floor) {
+			floor.position.x = -2;
+			floor.position.y = 1;
+			floor.position.z = -4;
+			scene.add(floor);
+			
+			floor.components = [];
+			floor.components["face"] = true;
+			floor.components["text"] = "Barrel";
+			//entities.add(scene);
+		});
+*/
+
+		menu_teleport = createText("TELEPORT");
+		menu_teleport.components = {};
+		menu_teleport.components.face = 1;
+		menu_teleport.components.position = new THREE.Vector3();
+
+		menu_absorb = createText("ABSORB");
+		menu_absorb.components = {};
+		menu_absorb.components.face = 1;
+
+		menu_build_cube = createText("CUBE");
+		menu_build_cube.components = {};
+		menu_build_cube.components.face = 1;
+		menu_build_cube.components.position = new THREE.Vector3();
+
+		// todo - remove
+/*		text_test = createText("TEST");
+		text_test.components = {};
+		text_test.components.face = 1;
+		entities.add(text_test);
+	*/	
+		// Create pointer
 		createCuboid(loader, 'textures/thesentinel/lavatile.jpg', .1, function(cube) {
 			highlight = cube;
 			highlight.name = "highlight";
@@ -79,6 +121,7 @@ land - can be landed on
 		var mapent = createMap(map, SIZE);
 		mapent.components = {};
 		mapent.components.land = true;
+		mapent.components.build = true;
 		entities.add(mapent);
 
 		/*
@@ -94,25 +137,6 @@ land - can be landed on
 		}
 		*/
 
-		// Tets maths
-		/*
-		console.log("1,1=" + Math.atan2(1, 1));
-		console.log("1,-1=" + Math.atan2(-1, 1));
-		console.log("-1,-1=" + Math.atan2(-1, -1));
-		console.log("-1,1=" + Math.atan2(1, -1));
-		console.log("0,1=" + Math.atan2(1, 0));
-		console.log("0,-1=" + Math.atan2(-1, 0));
-		*/
-		
-/*		
-		// Test rays
-		for (var i=2 ; i<20 ; i++) {
-				var x = i;//getRandomInt(1, SIZE-2);
-				var z = i//getRandomInt(1, SIZE-2);
-				var height = getHeightAtMapPoint(x, z)
-		}
-	*/	
-
 		// Add cubes to absorb
 		for (var i=0 ; i<20 ; i++) {
 			createCuboid(loader, 'textures/thesentinel/lavatile.jpg', .45, function(cube) {
@@ -125,6 +149,8 @@ land - can be landed on
 				
 				cube.components = {};
 				cube.components.absorb = 1;
+				cube.components.land = 1;
+				cube.components.build = 1;
 				
 				cube.name = "Cube";
 				entities.add(cube);
@@ -148,7 +174,6 @@ land - can be landed on
 
 		var x = getRandomInt(2, SIZE-3)+.5;
 		var z = getRandomInt(2, SIZE-3)+.5;
-		//sentinel.scale(1, 3, 1);
 
 		var height = getHeightAtMapPoint(x, z)
 		sentinel.position.x = x;
@@ -163,9 +188,6 @@ land - can be landed on
 		entities.add(sentinel);
 		sentinel.name = "Sentinel";
 
-//---------------------
-
-		
 		// Set player start position
 		var x = getRandomInt(2, SIZE-3)+.5;
 		var z = getRandomInt(2, SIZE-3)+.5;
@@ -173,7 +195,12 @@ land - can be landed on
 		dolly.position.x = x;
 		dolly.position.y = height;
 		dolly.position.z = z;
-
+/*
+// todo - remove
+text_test.position.x = dolly.position.x+2;
+text_test.position.y = dolly.position.y+3;
+text_test.position.z = dolly.position.z+2;
+*/
 		//this.text = createText("HELLO!");
 		//this.text.position.set(0, 2, -5);
 		//scene.add(this.text)
@@ -181,9 +208,9 @@ land - can be landed on
 	
 
 	function currentPointer(object, point) {
-		selectedObject = object;
+		pointedAtObject = object;
 		if (object != undefined) {
-			selectedPoint = point;
+			pointedAtPoint = point;
 			//object.material.color.setHex(0xff0000);
 			if (highlight != undefined) {
 				highlight.position.x = point.x;
@@ -195,29 +222,87 @@ land - can be landed on
 	
 	
 	export function onSelectStart() {
-		//console.log('onSelectStart()');
-		if (selectedObject != undefined) {
-			var s = selectedObject;
-			if (s.components) {
-				//console.log("Has components!");
-				if (s.components.absorb != undefined) {
-					//console.log("Absorbed!");
-					entities.remove(s);
-				}
-				if (s.components.land != undefined) {
-					dolly.position.x = selectedPoint.x;
-					dolly.position.y = selectedPoint.y + .1;
-					dolly.position.z = selectedPoint.z;
+		if (pointedAtObject != undefined) {
+			var s = pointedAtObject;
+			// Was it a menu item?
+			if (s == menu_absorb) {
+				console.log("Clicked on absorb");
+				entities.remove(menu_absorb.components.object);
+				removeMenu();
+			} else if (s == menu_teleport) {
+				console.log("Clicked on teleport");
+				dolly.position.x = menu_teleport.components.position.x;
+				dolly.position.y = menu_teleport.components.position.y + .1;
+				dolly.position.z = menu_teleport.components.position.z;
+				removeMenu();
+			} else if (s == menu_build_cube) {
+				// todo
+				removeMenu();
+			} else {
+				removeMenu();
+				console.log("Clicked on object");
+				// Clicked on a world object
+				selectedObject = pointedAtObject;
+				if (s.components) {
+					//console.log("Has components!");
+					if (s.components.absorb != undefined) {
+// todo  delete
+/*menu_teleport.position.x = dolly.position.x+2;
+menu_teleport.position.y = dolly.position.y+1.5;
+menu_teleport.position.z = dolly.position.z+2;
+entities.add(menu_teleport);
+
+menu_build_cube.position.x = s.position.x;
+menu_build_cube.position.y = s.position.y+1.5;
+menu_build_cube.position.z = s.position.z;
+entities.add(menu_build_cube);*/
+
+						menu_absorb.components.object = selectedObject;
+						menu_absorb.position.x = pointedAtPoint.x;
+						menu_absorb.position.y = pointedAtPoint.y + .3;
+						menu_absorb.position.z = pointedAtPoint.z;
+						entities.add(menu_absorb);
+						
+					}
+					if (s.components.land != undefined && pointedAtPoint != undefined) {
+						menu_teleport.components.position.x = pointedAtPoint.x;
+						menu_teleport.components.position.y = pointedAtPoint.y;
+						menu_teleport.components.position.z = pointedAtPoint.z;
+						
+						//menu_teleport.position.x = s.position.x;
+						//menu_teleport.position.y = s.position.y+1.5;
+						//menu_teleport.position.z = s.position.z;
+						menu_teleport.position.x = pointedAtPoint.x;
+						menu_teleport.position.y = pointedAtPoint.y + .6;
+						menu_teleport.position.z = pointedAtPoint.z;
+						entities.add(menu_teleport);
+					}
+					if (s.components.build != undefined && pointedAtPoint != undefined) {
+						menu_build_cube.components.position.x = pointedAtPoint.x;
+						menu_build_cube.components.position.y = pointedAtPoint.y;
+						menu_build_cube.components.position.z = pointedAtPoint.z;
+						
+						menu_build_cube.position.x = pointedAtPoint.x;
+						menu_build_cube.position.y = pointedAtPoint.y + 9;
+						menu_build_cube.position.z = pointedAtPoint.z;
+						entities.add(menu_build_cube);
+					}
 				}
 			}
 		} else {
-			console.log("Undefined!");
+			//console.log("Undefined!");
 		}
 	}
 
 	
+	function removeMenu() {
+		entities.remove(menu_absorb);
+		entities.remove(menu_teleport);
+		entities.remove(menu_build_cube);
+	}
+	
+	
 	export function onSelectEnd() {
-		//console.log('onSelectEnd()');
 	}
 
 
@@ -273,8 +358,6 @@ land - can be landed on
 			sentinel.rotation.y = -angleStoP;
 			sentinel.rotation.z = 0;*/
 			
-			//throw new Error();
-			
 			if (Math.abs(diff) < sentinelView) {
 				directionalLight.color.setHex(0xffff00);
 				//console.log("Can See!");
@@ -308,17 +391,17 @@ land - can be landed on
 			}
 		}
 
-/*		var s;
+		var s;
 		
-		for (s of scene.children) {
+		for (s of entities.children) {
 			if (s.components) {
 				// Point to face camera
-				if (s.components["face"] != undefined) {
+				if (s.components.face != undefined) {
 					s.rotation.y = Math.atan2( ( dolly.position.x - s.position.x ), ( dolly.position.z - s.position.z ) );
 				}
 			}
 		}
-*/
+
 	}
 
 
