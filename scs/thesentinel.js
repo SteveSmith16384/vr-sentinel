@@ -41,4 +41,17 @@ export function createMap(map, SIZE) {
 		return end;
 }
 
+export function createCube(loader, callback) {
+	createCuboid(loader, 'textures/thesentinel/lavatile.jpg', .45, function(cube) {
+		
+		cube.components = {};
+		cube.components.absorb = 1;
+		cube.components.land = 1;
+		cube.components.build = 1;
+		
+		cube.name = "Cube";
+		callback(cube);
+	});
+}
+
 

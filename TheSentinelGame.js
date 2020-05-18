@@ -1,6 +1,6 @@
 import * as THREE from './build/three.module.js';
 //import { createBillboard, createText } from './scs/helperfunctions.js';
-import { createMap } from './scs/thesentinel.js';
+import { createMap, createCube } from './scs/thesentinel.js';
 import { create2DArray } from './scs/collections.js';
 import { getRandomInt } from './scs/numberfunctions.js';
 import { createBillboard, createPlane_NoTex, createCuboid, createCuboidSides, createText } from './scs/helperfunctions.js';
@@ -13,17 +13,21 @@ text - Text to show if player pointing at it.
 absorb - energy gained fom absorption
 land - can be landed on
 build - can build on
+highlight - menu change colour when selected
 */
 
-
-	var selectables;
+	// Settings
+	const sentinelView = Math.PI / 8;
+	const SENTINEL_HEIGHT = 2;
+	const PLAYER_HEIGHT = .1;
+	
+	// Other vars
 	var scene, dolly;
 	var loader = undefined; // Texture loader
 	var map = undefined;
 	var entities = undefined; // Anything that can be selected
 	
 	var selectedObject; // The object the player has clicked on
-	//var selectedPoint = new THREE.3();;
 	var pointedAtObject; // The object the player is pointing at
 	var pointedAtPoint; // Where the player is currently pointing
 	
@@ -35,13 +39,10 @@ build - can build on
 	const clock = new THREE.Clock();
 	var directionalLight;
 	
-	const sentinelView = Math.PI / 8;
-	const SENTINEL_HEIGHT = 2;
-	
+	var menuitems = [];
 	var menu_absorb;
 	var menu_build_cube;
 	var menu_teleport;
-	var text_test;
 
 	export function initGame(_scene, _dolly) {
 		scene = _scene;
@@ -80,23 +81,23 @@ build - can build on
 		menu_teleport = createText("TELEPORT");
 		menu_teleport.components = {};
 		menu_teleport.components.face = 1;
+		menu_teleport.components.highlight = 1;
 		menu_teleport.components.position = new THREE.Vector3();
-
+		menuitems.push(menu_teleport);
+		
 		menu_absorb = createText("ABSORB");
 		menu_absorb.components = {};
 		menu_absorb.components.face = 1;
+		menu_absorb.components.highlight = 1;
+		menuitems.push(menu_absorb);
 
 		menu_build_cube = createText("CUBE");
 		menu_build_cube.components = {};
 		menu_build_cube.components.face = 1;
+		menu_build_cube.components.highlight = 1;
 		menu_build_cube.components.position = new THREE.Vector3();
+		menuitems.push(menu_build_cube);
 
-		// todo - remove
-/*		text_test = createText("TEST");
-		text_test.components = {};
-		text_test.components.face = 1;
-		entities.add(text_test);
-	*/	
 		// Create pointer
 		createCuboid(loader, 'textures/thesentinel/lavatile.jpg', .1, function(cube) {
 			highlight = cube;
@@ -139,20 +140,22 @@ build - can build on
 
 		// Add cubes to absorb
 		for (var i=0 ; i<20 ; i++) {
-			createCuboid(loader, 'textures/thesentinel/lavatile.jpg', .45, function(cube) {
+			//createCuboid(loader, 'textures/thesentinel/lavatile.jpg', .45, function(cube) {
+			createCube(loader, function(cube) {
+				/*cube.components = {};
+				cube.components.absorb = 1;
+				cube.components.land = 1;
+				cube.components.build = 1;
+				
+				cube.name = "Cube";*/
+
 				var x = getRandomInt(2, SIZE-3)+.5;
 				var z = getRandomInt(2, SIZE-3)+.5;
 				var height = getHeightAtMapPoint(x, z)
 				cube.position.x = x;
 				cube.position.y = height+.5;//map[x][z]+1;
 				cube.position.z = z;
-				
-				cube.components = {};
-				cube.components.absorb = 1;
-				cube.components.land = 1;
-				cube.components.build = 1;
-				
-				cube.name = "Cube";
+
 				entities.add(cube);
 			});
 		}
@@ -195,12 +198,7 @@ build - can build on
 		dolly.position.x = x;
 		dolly.position.y = height;
 		dolly.position.z = z;
-/*
-// todo - remove
-text_test.position.x = dolly.position.x+2;
-text_test.position.y = dolly.position.y+3;
-text_test.position.z = dolly.position.z+2;
-*/
+
 		//this.text = createText("HELLO!");
 		//this.text.position.set(0, 2, -5);
 		//scene.add(this.text)
@@ -232,11 +230,20 @@ text_test.position.z = dolly.position.z+2;
 			} else if (s == menu_teleport) {
 				console.log("Clicked on teleport");
 				dolly.position.x = menu_teleport.components.position.x;
-				dolly.position.y = menu_teleport.components.position.y + .1;
+				dolly.position.y = menu_teleport.components.position.y + PLAYER_HEIGHT;
 				dolly.position.z = menu_teleport.components.position.z;
 				removeMenu();
 			} else if (s == menu_build_cube) {
-				// todo
+				createCube(loader, function(cube) {
+					var x = pointedAtPoint.x;
+					var z = pointedAtPoint.z;
+					var height = getHeightAtMapPoint(x, z)
+					cube.position.x = x;
+					cube.position.y = height + .5;
+					cube.position.z = z;
+					entities.add(cube);
+				});
+
 				removeMenu();
 			} else {
 				removeMenu();
@@ -282,9 +289,14 @@ text_test.position.z = dolly.position.z+2;
 
 	
 	function removeMenu() {
+		/*
 		entities.remove(menu_absorb);
 		entities.remove(menu_teleport);
 		entities.remove(menu_build_cube);
+		*/
+		for (var i = 0; i < menuitems.length; i++ ) {
+			entities.remove(menuitems[i]);
+		}
 	}
 	
 	
@@ -302,11 +314,21 @@ text_test.position.z = dolly.position.z+2;
 		var intersects = raycaster.intersectObjects(entities.children);
 
 		if (intersects.length > 0) {
-			currentPointer(intersects[0].object, intersects[0].point);
+			var obj = intersects[0].object;
+			currentPointer(obj, intersects[0].point);
+			if (obj.components != undefined) {
+				if (obj.components.highlight != undefined) {
+					for (var i = 0; i < menuitems.length; i++ ) {
+						menuitems[i].material.color.setHex(0xffffff);
+					}
+					obj.material.color.setHex(0x00ffff);
+				}
+			}
 		} else {
 			//intersectedObject = undefined;
 		}
-				
+		
+		// Process entinel
 		if (sentinel != undefined) {
 			// Rotate sentinel
 			sentinel.rotation.y += .6 * delta;
@@ -377,9 +399,7 @@ text_test.position.z = dolly.position.z+2;
 			}
 		}
 
-		var s;
-		
-		for (s of entities.children) {
+		for (var s of entities.children) {
 			if (s.components) {
 				// Point to face camera
 				if (s.components.face != undefined) {
@@ -395,10 +415,6 @@ text_test.position.z = dolly.position.z+2;
 		var x = dolly.position.x - sentinel.position.x;
 		var z = dolly.position.z - sentinel.position.z;
 		var rads = Math.atan2(z, x);
-		/*while (rads < 0) {
-			rads += (Math.PI * 2);
-		}*/
-		
 		return rads;
 	}
 	
