@@ -12,6 +12,7 @@ face - Always face the camera
 text - Text to show if player pointing at it.
 absorb - energy gained fom absorption
 land - can be landed on
+alwaysland - can be landed on even if only see sides
 build - can build on
 highlight - menu change colour when selected
 */
@@ -110,11 +111,6 @@ highlight - menu change colour when selected
 				map[x+1][y] = rnd;
 				map[x][y+1] = rnd;
 				map[x+1][y+1] = rnd;
-				/*
-				mapflat[x][y] = 1;
-				mapflat[x+1][y] = 0;
-				mapflat[x][y+1] = 0;
-				mapflat[x+1][y+1] = 0;*/
 			}
 		}
 
@@ -124,19 +120,6 @@ highlight - menu change colour when selected
 		mapent.components.build = true;
 		entities.add(mapent);
 
-		/*
-		// Slow way to create a map that is slow to draw
-		for (y=0 ; y<SIZE-1 ; y++) {
-			for (x=0 ; x<SIZE-1 ; x++) {
-				var plane = createPlane_NoTex(map[x][y], map[x+1][y], map[x][y+1], map[x+1][y+1]);
-				plane.position.x = x;
-				plane.position.y = 0;
-				plane.position.z = -y;
-				entities.add(plane);
-			}
-		}
-		*/
-
 		// Add cubes to absorb
 		for (var i=0 ; i<20 ; i++) {
 			createCube(loader, function(cube) {
@@ -145,7 +128,7 @@ highlight - menu change colour when selected
 				if (isMapFlat(x, z)) {
 					var height = getHeightAtMapPoint(x, z)
 					cube.position.x = x;
-					cube.position.y = height+.5;//map[x][z]+1;
+					cube.position.y = height+.5;
 					cube.position.z = z;
 
 					entities.add(cube);
@@ -181,6 +164,7 @@ highlight - menu change colour when selected
 		sentinel.rotation.z = 0;
 
 		sentinel.components = {};
+		sentinel.components.absorb = 1;
 		entities.add(sentinel);
 		sentinel.name = "Sentinel";
 
@@ -191,10 +175,6 @@ highlight - menu change colour when selected
 		dolly.position.x = x;
 		dolly.position.y = height;
 		dolly.position.z = z;
-		
-		//this.text = createText("HELLO!");
-		//this.text.position.set(0, 2, -5);
-		//scene.add(this.text)
 	}
 	
 
@@ -219,6 +199,10 @@ highlight - menu change colour when selected
 			if (s == menu_absorb) {
 				//console.log("Clicked on absorb");
 				entities.remove(menu_absorb.components.object);
+				if (menu_absorb.components.object == sentinel) {
+					entities.remove(map);
+					// todo - player has completed the level
+				}
 				incEnergy(1);
 				removeMenu();
 			} else if (s == menu_teleport) {
@@ -259,41 +243,42 @@ highlight - menu change colour when selected
 					}
 					if (s.components.land != undefined && pointedAtPoint != undefined) {
 						if (energy > 0) {
-						// Check we can see the top
-						if (height-1 <= dolly.position.y) {
-							if (isMapFlat(pointedAtPoint.x, pointedAtPoint.z)) {
-								menu_teleport.components.position.x = pointedAtPoint.x;
-								menu_teleport.components.position.z = pointedAtPoint.z;
-								menu_teleport.components.position.y = height;
-								menu_teleport.position.x = pointedAtPoint.x;
-								menu_teleport.position.y = pointedAtPoint.y + .6;
-								menu_teleport.position.z = pointedAtPoint.z;
-								menu_teleport.rotation.y = Math.atan2( ( dolly.position.x - menu_teleport.position.x ), ( dolly.position.z - menu_teleport.position.z ) );
-								entities.add(menu_teleport);
+							// Check we can see the top
+							if (s.components.alwaysland != undefined || height-1 <= dolly.position.y) {
+								if (isMapFlat(pointedAtPoint.x, pointedAtPoint.z)) {
+									menu_teleport.components.position.x = pointedAtPoint.x;
+									menu_teleport.components.position.z = pointedAtPoint.z;
+									menu_teleport.components.position.y = height;
+									menu_teleport.position.x = pointedAtPoint.x;
+									menu_teleport.position.y = pointedAtPoint.y + .6;
+									menu_teleport.position.z = pointedAtPoint.z;
+									menu_teleport.rotation.y = Math.atan2( ( dolly.position.x - menu_teleport.position.x ), ( dolly.position.z - menu_teleport.position.z ) );
+									entities.add(menu_teleport);
+								}
 							}
-						}
 						}
 					}
 					if (s.components.build != undefined && pointedAtPoint != undefined) {
 						if (energy > 0) {
-						// Check we can see the top
-						if (height-1 <= dolly.position.y) {
-							if (isMapFlat(pointedAtPoint.x, pointedAtPoint.z)) {
-								menu_build_cube.components.position.x = pointedAtPoint.x;
-								menu_build_cube.components.position.y = pointedAtPoint.y;
-								menu_build_cube.components.position.z = pointedAtPoint.z;
-								
-								menu_build_cube.position.x = pointedAtPoint.x;
-								menu_build_cube.position.y = pointedAtPoint.y + .9;
-								menu_build_cube.position.z = pointedAtPoint.z;
-								menu_build_cube.rotation.y = Math.atan2( ( dolly.position.x - menu_build_cube.position.x ), ( dolly.position.z - menu_build_cube.position.z ) );
-								entities.add(menu_build_cube);
+							// Check we can see the top
+							if (height-1 <= dolly.position.y) {
+								if (isMapFlat(pointedAtPoint.x, pointedAtPoint.z)) {
+									menu_build_cube.components.position.x = pointedAtPoint.x;
+									menu_build_cube.components.position.y = pointedAtPoint.y;
+									menu_build_cube.components.position.z = pointedAtPoint.z;
+									
+									menu_build_cube.position.x = pointedAtPoint.x;
+									menu_build_cube.position.y = pointedAtPoint.y + .9;
+									menu_build_cube.position.z = pointedAtPoint.z;
+									menu_build_cube.rotation.y = Math.atan2( ( dolly.position.x - menu_build_cube.position.x ), ( dolly.position.z - menu_build_cube.position.z ) );
+									entities.add(menu_build_cube);
+								}
 							}
-						}
 						}
 					}
 					
 					// Position stats
+					setText(energy_text, "ENERGY: " + Math.floor(energy));
 					energy_text.position.x = pointedAtPoint.x;
 					energy_text.position.y = pointedAtPoint.y + 1.2;
 					energy_text.position.z = pointedAtPoint.z;
@@ -393,11 +378,11 @@ highlight - menu change colour when selected
 				
 				var intersects = raycaster.intersectObjects(entities.children);
 				if (intersects.length == 0) {
-					directionalLight.color.setHex(0xff0000);
+					seenBySentinel(delta);
 				} else if (intersects.length > 0) {
 					var toPlayer = vecToPlayer.length();
 					if (intersects[0].distance > toPlayer) {
-						directionalLight.color.setHex(0xff0000);
+						seenBySentinel(delta);
 					}
 				}
 			} else {
@@ -413,6 +398,13 @@ highlight - menu change colour when selected
 			}
 		}
 		
+	}
+
+
+	function seenBySentinel(delta) {
+		directionalLight.color.setHex(0xff0000);
+		incEnergy(-delta);
+		//console.log("Energy: " + energy);
 	}
 
 
@@ -435,34 +427,35 @@ highlight - menu change colour when selected
 		return intersects[0].point.y;
 	}
 	
+	
 	function isMapFlat(x, z) {
 		var x1 = Math.floor(x) + .2;
 		var z1 = Math.floor(z) + .2;
-		//console.log(x1 + "_" + z1);
-		raycaster.ray.origin.x = x1;
-		raycaster.ray.origin.y = 100;
-		raycaster.ray.origin.z = z1;
-		raycaster.ray.direction.set( 0, -1, 0 );
-		var intersects = raycaster.intersectObjects(entities.children);
-		var height1 = intersects[0].point.y;
+		var height1 = getHeightAtMapPoint(x1, z1);
 
 		x1 = Math.floor(x) + .8;
 		z1 = Math.floor(z) + .8;
-		raycaster.ray.origin.x = x1;
-		raycaster.ray.origin.z = z1;
-		//raycaster.ray.direction.set( 0, -1, 0 );
-
-		intersects = raycaster.intersectObjects(entities.children);
-
-		var height2 = intersects[0].point.y;
+		var height2 = getHeightAtMapPoint(x1, z1);
 		
-		return height1 == height2;
+		if (height1 == height2) {
+			x1 = Math.floor(x) + .2;
+			z1 = Math.floor(z) + .8;
+			var height3 = getHeightAtMapPoint(x1, z1);
+			if (height3 == height2) {
+				x1 = Math.floor(x) + .8;
+				z1 = Math.floor(z) + .2;
+				var height4 = getHeightAtMapPoint(x1, z1);
+				return height4 == height3;
+			}
+		}
+		return false;
 	}
 	
 	
 	function incEnergy(v) {
 		energy += v;
-		setText(energy_text, "ENERGY: " + energy);
-
+		if (energy < 0) {
+			energy = 0;
+		}
 	}
 	

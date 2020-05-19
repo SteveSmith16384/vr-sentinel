@@ -48,6 +48,7 @@ export function createCube(loader, callback) {
 		cube.components.absorb = 1;
 		cube.components.land = 1;
 		cube.components.build = 1;
+		cube.components.alwaysland = 1;
 		
 		cube.name = "Cube";
 		callback(cube);
