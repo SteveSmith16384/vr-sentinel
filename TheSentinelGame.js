@@ -3,7 +3,7 @@ import * as THREE from './build/three.module.js';
 import { createMap, createCube } from './scs/thesentinel.js';
 import { create2DArray } from './scs/collections.js';
 import { getRandomInt } from './scs/numberfunctions.js';
-import { createBillboard, createPlane_NoTex, createCuboid, createCuboidSides, createText } from './scs/helperfunctions.js';
+import { createBillboard, createPlane_NoTex, createCuboid, createCuboidSides, createText, setText } from './scs/helperfunctions.js';
 
 
 /*
@@ -20,6 +20,7 @@ highlight - menu change colour when selected
 	const sentinelView = Math.PI / 8;
 	const SENTINEL_HEIGHT = 2;
 	const PLAYER_HEIGHT = .1;
+	const START_ENERGY = 3;
 	
 	// Other vars
 	var scene, dolly;
@@ -34,6 +35,8 @@ highlight - menu change colour when selected
 	
 	var highlight = undefined;
 	var sentinel = undefined;
+	var energy = START_ENERGY;
+	var energy_text;
 	
 	var tempMatrix = new THREE.Matrix4();
 	var raycaster = new THREE.Raycaster();
@@ -65,39 +68,28 @@ highlight - menu change colour when selected
 		scene.background = new THREE.Color( 0x666666 );
 
 		// Create menu items
-		/*
-		createBillboard(scene, loader, 'textures/dizzy3/barrel.png', 2, 2, function(floor) {
-			floor.position.x = -2;
-			floor.position.y = 1;
-			floor.position.z = -4;
-			scene.add(floor);
-			
-			floor.components = [];
-			floor.components["face"] = true;
-			floor.components["text"] = "Barrel";
-			//entities.add(scene);
-		});
-*/
-
 		menu_teleport = createText("TELEPORT");
 		menu_teleport.components = {};
-		menu_teleport.components.face = 1;
+		//menu_teleport.components.face = 1;
 		menu_teleport.components.highlight = 1;
 		menu_teleport.components.position = new THREE.Vector3();
 		menuitems.push(menu_teleport);
 		
 		menu_absorb = createText("ABSORB");
 		menu_absorb.components = {};
-		menu_absorb.components.face = 1;
+		//menu_absorb.components.face = 1;
 		menu_absorb.components.highlight = 1;
 		menuitems.push(menu_absorb);
 
 		menu_build_cube = createText("CUBE");
 		menu_build_cube.components = {};
-		menu_build_cube.components.face = 1;
+		//menu_build_cube.components.face = 1;
 		menu_build_cube.components.highlight = 1;
 		menu_build_cube.components.position = new THREE.Vector3();
 		menuitems.push(menu_build_cube);
+
+		energy_text = createText("ENERGY: " + energy);
+		menuitems.push(energy_text);
 
 		// Create pointer
 		createCuboid(loader, 'textures/thesentinel/lavatile.jpg', .1, function(cube) {
@@ -199,7 +191,7 @@ highlight - menu change colour when selected
 		dolly.position.x = x;
 		dolly.position.y = height;
 		dolly.position.z = z;
-
+		
 		//this.text = createText("HELLO!");
 		//this.text.position.set(0, 2, -5);
 		//scene.add(this.text)
@@ -225,14 +217,16 @@ highlight - menu change colour when selected
 			var s = pointedAtObject;
 			// Was it a menu item?
 			if (s == menu_absorb) {
-				console.log("Clicked on absorb");
+				//console.log("Clicked on absorb");
 				entities.remove(menu_absorb.components.object);
+				incEnergy(1);
 				removeMenu();
 			} else if (s == menu_teleport) {
-				console.log("Clicked on teleport");
+				//console.log("Clicked on teleport");
 				dolly.position.x = menu_teleport.components.position.x;
 				dolly.position.y = menu_teleport.components.position.y + PLAYER_HEIGHT;
 				dolly.position.z = menu_teleport.components.position.z;
+				incEnergy(-1);
 				removeMenu();
 			} else if (s == menu_build_cube) {
 				createCube(loader, function(cube) {
@@ -243,6 +237,7 @@ highlight - menu change colour when selected
 					cube.position.y = height + .5;
 					cube.position.z = z;
 					entities.add(cube);
+					incEnergy(-1);
 				});
 
 				removeMenu();
@@ -250,7 +245,6 @@ highlight - menu change colour when selected
 				var height = getHeightAtMapPoint(pointedAtPoint.x, pointedAtPoint.z);
 
 				removeMenu();
-				console.log("Clicked on object");
 				// Clicked on a world object
 				selectedObject = pointedAtObject;
 				if (s.components) {
@@ -260,52 +254,59 @@ highlight - menu change colour when selected
 						menu_absorb.position.x = pointedAtPoint.x;
 						menu_absorb.position.y = pointedAtPoint.y + .3;
 						menu_absorb.position.z = pointedAtPoint.z;
-						entities.add(menu_absorb);
-						
+						menu_absorb.rotation.y = Math.atan2( ( dolly.position.x - menu_absorb.position.x ), ( dolly.position.z - menu_absorb.position.z ) );
+						entities.add(menu_absorb);						
 					}
 					if (s.components.land != undefined && pointedAtPoint != undefined) {
+						if (energy > 0) {
 						// Check we can see the top
 						if (height-1 <= dolly.position.y) {
 							if (isMapFlat(pointedAtPoint.x, pointedAtPoint.z)) {
-							menu_teleport.components.position.x = pointedAtPoint.x;
-							menu_teleport.components.position.z = pointedAtPoint.z;
-							menu_teleport.components.position.y = height;
-							menu_teleport.position.x = pointedAtPoint.x;
-							menu_teleport.position.y = pointedAtPoint.y + .6;
-							menu_teleport.position.z = pointedAtPoint.z;
-							entities.add(menu_teleport);
+								menu_teleport.components.position.x = pointedAtPoint.x;
+								menu_teleport.components.position.z = pointedAtPoint.z;
+								menu_teleport.components.position.y = height;
+								menu_teleport.position.x = pointedAtPoint.x;
+								menu_teleport.position.y = pointedAtPoint.y + .6;
+								menu_teleport.position.z = pointedAtPoint.z;
+								menu_teleport.rotation.y = Math.atan2( ( dolly.position.x - menu_teleport.position.x ), ( dolly.position.z - menu_teleport.position.z ) );
+								entities.add(menu_teleport);
+							}
 						}
 						}
 					}
 					if (s.components.build != undefined && pointedAtPoint != undefined) {
+						if (energy > 0) {
 						// Check we can see the top
 						if (height-1 <= dolly.position.y) {
 							if (isMapFlat(pointedAtPoint.x, pointedAtPoint.z)) {
-							menu_build_cube.components.position.x = pointedAtPoint.x;
-							menu_build_cube.components.position.y = pointedAtPoint.y;
-							menu_build_cube.components.position.z = pointedAtPoint.z;
-							
-							menu_build_cube.position.x = pointedAtPoint.x;
-							menu_build_cube.position.y = pointedAtPoint.y + .9;
-							menu_build_cube.position.z = pointedAtPoint.z;
-							entities.add(menu_build_cube);
+								menu_build_cube.components.position.x = pointedAtPoint.x;
+								menu_build_cube.components.position.y = pointedAtPoint.y;
+								menu_build_cube.components.position.z = pointedAtPoint.z;
+								
+								menu_build_cube.position.x = pointedAtPoint.x;
+								menu_build_cube.position.y = pointedAtPoint.y + .9;
+								menu_build_cube.position.z = pointedAtPoint.z;
+								menu_build_cube.rotation.y = Math.atan2( ( dolly.position.x - menu_build_cube.position.x ), ( dolly.position.z - menu_build_cube.position.z ) );
+								entities.add(menu_build_cube);
 							}
 						}
+						}
 					}
+					
+					// Position stats
+					energy_text.position.x = pointedAtPoint.x;
+					energy_text.position.y = pointedAtPoint.y + 1.2;
+					energy_text.position.z = pointedAtPoint.z;
+					energy_text.rotation.y = Math.atan2( ( dolly.position.x - energy_text.position.x ), ( dolly.position.z - energy_text.position.z ) );
+					entities.add(energy_text);
+
 				}
 			}
-		} else {
-			//console.log("Undefined!");
 		}
 	}
 
 	
 	function removeMenu() {
-		/*
-		entities.remove(menu_absorb);
-		entities.remove(menu_teleport);
-		entities.remove(menu_build_cube);
-		*/
 		for (var i = 0; i < menuitems.length; i++ ) {
 			entities.remove(menuitems[i]);
 		}
@@ -373,11 +374,6 @@ highlight - menu change colour when selected
 			
 			directionalLight.color.setHex(0x00ff00);
 			
-			// Look at player
-			/*sentinel.rotation.x = 0;
-			sentinel.rotation.y = -angleStoP;
-			sentinel.rotation.z = 0;*/
-			
 			if (Math.abs(diff) < sentinelView) {
 				directionalLight.color.setHex(0xffff00);
 				//console.log("Can See!");
@@ -396,12 +392,9 @@ highlight - menu change colour when selected
 				raycaster.ray.direction.z = vecNrm.z;
 				
 				var intersects = raycaster.intersectObjects(entities.children);
-				//console.log("intersections=" + intersects.length);
 				if (intersects.length == 0) {
-					//console.log("No intersections");
 					directionalLight.color.setHex(0xff0000);
 				} else if (intersects.length > 0) {
-					//console.log("1 intersection");
 					var toPlayer = vecToPlayer.length();
 					if (intersects[0].distance > toPlayer) {
 						directionalLight.color.setHex(0xff0000);
@@ -419,7 +412,7 @@ highlight - menu change colour when selected
 				}
 			}
 		}
-
+		
 	}
 
 
@@ -466,4 +459,10 @@ highlight - menu change colour when selected
 		return height1 == height2;
 	}
 	
+	
+	function incEnergy(v) {
+		energy += v;
+		setText(energy_text, "ENERGY: " + energy);
+
+	}
 	

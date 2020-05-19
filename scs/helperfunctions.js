@@ -46,6 +46,21 @@ export function createText(text) {
 }
 
 
+export function setText(mesh, text) {
+	var canvas1 = document.createElement('canvas');
+	var context1 = canvas1.getContext('2d');
+	context1.font = "Bold 60px Arial";
+	context1.fillStyle = "rgba(255,255,255,1)";
+	context1.fillText(text, 0, 60);
+
+	// canvas contents will be used for a texture
+	var texture1 = new THREE.Texture(canvas1)
+	texture1.needsUpdate = true;
+
+	mesh.material.map = texture1;
+}
+
+
 export function createCuboid(loader, tex, scl, callback) {
 	loader.load(tex, function ( texture ) {
 
