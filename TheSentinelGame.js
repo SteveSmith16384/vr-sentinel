@@ -1,10 +1,10 @@
 import * as THREE from './build/three.module.js';
 //import { createBillboard, createText } from './scs/helperfunctions.js';
-import { createMap, createCube } from './scs/thesentinel.js';
+import { createMap, createCube, createSentinel } from './scs/thesentinel.js';
 import { create2DArray } from './scs/collections.js';
 import { getRandomInt } from './scs/numberfunctions.js';
-import { createBillboard, createPlane_NoTex, createCuboid, createCuboidSides, createText, setText } from './scs/helperfunctions.js';
-
+import { createPlane_NoTex, createCuboid, createCuboidSides, createText, setText } from './scs/helperfunctions.js';
+import { OBJLoader } from './jsm/loaders/OBJLoader.js';
 
 /*
 ECS Components:-
@@ -25,7 +25,8 @@ highlight - menu change colour when selected
 	
 	// Other vars
 	var scene, dolly;
-	var loader = undefined; // Texture loader
+	var tex_loader = undefined; // Texture loader
+	var obj_loader = undefined; // Texture loader
 	var map = undefined;
 	var mapflat = undefined;
 	var entities = undefined; // Anything that can be selected
@@ -53,7 +54,9 @@ highlight - menu change colour when selected
 		scene = _scene;
 		dolly = _dolly;
 		
-		loader = new THREE.TextureLoader();
+		var manager = new THREE.LoadingManager();
+		tex_loader = new THREE.TextureLoader();
+		obj_loader = new OBJLoader(manager);
 		
 		entities = new THREE.Group();
 		scene.add(entities);
@@ -71,20 +74,17 @@ highlight - menu change colour when selected
 		// Create menu items
 		menu_teleport = createText("TELEPORT");
 		menu_teleport.components = {};
-		//menu_teleport.components.face = 1;
 		menu_teleport.components.highlight = 1;
 		menu_teleport.components.position = new THREE.Vector3();
 		menuitems.push(menu_teleport);
 		
 		menu_absorb = createText("ABSORB");
 		menu_absorb.components = {};
-		//menu_absorb.components.face = 1;
 		menu_absorb.components.highlight = 1;
 		menuitems.push(menu_absorb);
 
 		menu_build_cube = createText("CUBE");
 		menu_build_cube.components = {};
-		//menu_build_cube.components.face = 1;
 		menu_build_cube.components.highlight = 1;
 		menu_build_cube.components.position = new THREE.Vector3();
 		menuitems.push(menu_build_cube);
@@ -93,7 +93,7 @@ highlight - menu change colour when selected
 		menuitems.push(energy_text);
 
 		// Create pointer
-		createCuboid(loader, 'textures/thesentinel/lavatile.jpg', .1, function(cube) {
+		createCuboid(tex_loader, 'textures/thesentinel/lavatile.jpg', .1, function(cube) {
 			highlight = cube;
 			highlight.name = "highlight";
 			scene.add(cube);
@@ -122,7 +122,7 @@ highlight - menu change colour when selected
 
 		// Add cubes to absorb
 		for (var i=0 ; i<20 ; i++) {
-			createCube(loader, function(cube) {
+			createCube(tex_loader, function(cube) {
 				var x = getRandomInt(2, SIZE-3)+.5;
 				var z = getRandomInt(2, SIZE-3)+.5;
 				if (isMapFlat(x, z)) {
@@ -137,36 +137,38 @@ highlight - menu change colour when selected
 		}
 
 		// Sentinel
-		sentinel = new THREE.Group();
+		createSentinel(obj_loader, SENTINEL_HEIGHT, function (obj) {
+			sentinel = obj;
+			/*sentinel = new THREE.Group();
 
-		var material_front = new THREE.MeshPhongMaterial({color: 0xffffff });
-		var cube_front = createCuboidSides(0, 0, 0, 1, 0, 0);
-		cube_front.scale(.5, SENTINEL_HEIGHT*.5, .5);
-		var front = new THREE.Mesh(cube_front, material_front);
-		sentinel.add(front);
+			var material_front = new THREE.MeshPhongMaterial({color: 0xffffff });
+			var cube_front = createCuboidSides(0, 0, 0, 1, 0, 0);
+			cube_front.scale(.5, SENTINEL_HEIGHT*.5, .5);
+			var front = new THREE.Mesh(cube_front, material_front);
+			sentinel.add(front);
 
-		var material_rest = new THREE.MeshPhongMaterial({color: 0xff0000 });
-		var cube_rest = createCuboidSides(1, 1, 1, 0, 1, 1);
-		cube_rest.scale(.5, SENTINEL_HEIGHT*.5, .5);
-		var rest = new THREE.Mesh(cube_rest, material_rest);
-		sentinel.add(rest);		
+			var material_rest = new THREE.MeshPhongMaterial({color: 0xff0000 });
+			var cube_rest = createCuboidSides(1, 1, 1, 0, 1, 1);
+			cube_rest.scale(.5, SENTINEL_HEIGHT*.5, .5);
+			var rest = new THREE.Mesh(cube_rest, material_rest);
+			sentinel.add(rest);		
+	*/
+			var x = getRandomInt(2, SIZE-3)+.5;
+			var z = getRandomInt(2, SIZE-3)+.5;
+			var height = getHeightAtMapPoint(x, z)
+			sentinel.position.x = x;
+			sentinel.position.y = height;//+(SENTINEL_HEIGHT/2);
+			sentinel.position.z = z;
+	/*
+			sentinel.rotation.x = 0;
+			sentinel.rotation.y = 0;
+			sentinel.rotation.z = 0;
 
-		var x = getRandomInt(2, SIZE-3)+.5;
-		var z = getRandomInt(2, SIZE-3)+.5;
-
-		var height = getHeightAtMapPoint(x, z)
-		sentinel.position.x = x;
-		sentinel.position.y = height+(SENTINEL_HEIGHT/2);
-		sentinel.position.z = z;
-
-		sentinel.rotation.x = 0;
-		sentinel.rotation.y = 0;
-		sentinel.rotation.z = 0;
-
-		sentinel.components = {};
-		sentinel.components.absorb = 1;
-		entities.add(sentinel);
-		sentinel.name = "Sentinel";
+			sentinel.components = {};
+			sentinel.components.absorb = 1;*/
+			entities.add(sentinel);
+	//		sentinel.name = "Sentinel";
+		});
 
 		// Set player start position
 		var x = getRandomInt(2, SIZE-3)+.5;
@@ -213,7 +215,7 @@ highlight - menu change colour when selected
 				incEnergy(-1);
 				removeMenu();
 			} else if (s == menu_build_cube) {
-				createCube(loader, function(cube) {
+				createCube(tex_loader, function(cube) {
 					var x = Math.floor(menu_build_cube.components.position.x) + .5;
 					var z = Math.floor(menu_build_cube.components.position.z) + .5;
 					var height = getHeightAtMapPoint(x, z)
@@ -236,7 +238,7 @@ highlight - menu change colour when selected
 					if (s.components.absorb != undefined) {
 						menu_absorb.components.object = selectedObject;
 						menu_absorb.position.x = pointedAtPoint.x;
-						menu_absorb.position.y = pointedAtPoint.y + .3;
+						menu_absorb.position.y = height + .3;
 						menu_absorb.position.z = pointedAtPoint.z;
 						menu_absorb.rotation.y = Math.atan2( ( dolly.position.x - menu_absorb.position.x ), ( dolly.position.z - menu_absorb.position.z ) );
 						entities.add(menu_absorb);						
@@ -244,13 +246,13 @@ highlight - menu change colour when selected
 					if (s.components.land != undefined && pointedAtPoint != undefined) {
 						if (energy > 0) {
 							// Check we can see the top
-							if (s.components.alwaysland != undefined || height-1 <= dolly.position.y) {
+							if (s.components.cube != undefined || height-1 <= dolly.position.y) {
 								if (isMapFlat(pointedAtPoint.x, pointedAtPoint.z)) {
-									menu_teleport.components.position.x = pointedAtPoint.x;
-									menu_teleport.components.position.z = pointedAtPoint.z;
+									menu_teleport.components.position.x = Math.floor(pointedAtPoint.x) + .5;
+									menu_teleport.components.position.z = Math.floor(pointedAtPoint.z) + .5;
 									menu_teleport.components.position.y = height;
 									menu_teleport.position.x = pointedAtPoint.x;
-									menu_teleport.position.y = pointedAtPoint.y + .6;
+									menu_teleport.position.y = height + .6;
 									menu_teleport.position.z = pointedAtPoint.z;
 									menu_teleport.rotation.y = Math.atan2( ( dolly.position.x - menu_teleport.position.x ), ( dolly.position.z - menu_teleport.position.z ) );
 									entities.add(menu_teleport);
@@ -261,14 +263,14 @@ highlight - menu change colour when selected
 					if (s.components.build != undefined && pointedAtPoint != undefined) {
 						if (energy > 0) {
 							// Check we can see the top
-							if (height-1 <= dolly.position.y) {
+							if (s.components.cube != undefined || height-1 <= dolly.position.y) {
 								if (isMapFlat(pointedAtPoint.x, pointedAtPoint.z)) {
-									menu_build_cube.components.position.x = pointedAtPoint.x;
+									menu_build_cube.components.position.x = Math.floor(pointedAtPoint.x) + .5;
 									menu_build_cube.components.position.y = pointedAtPoint.y;
-									menu_build_cube.components.position.z = pointedAtPoint.z;
+									menu_build_cube.components.position.z = Math.floor(pointedAtPoint.z) + .5;
 									
 									menu_build_cube.position.x = pointedAtPoint.x;
-									menu_build_cube.position.y = pointedAtPoint.y + .9;
+									menu_build_cube.position.y = height + .9;
 									menu_build_cube.position.z = pointedAtPoint.z;
 									menu_build_cube.rotation.y = Math.atan2( ( dolly.position.x - menu_build_cube.position.x ), ( dolly.position.z - menu_build_cube.position.z ) );
 									entities.add(menu_build_cube);
@@ -280,7 +282,7 @@ highlight - menu change colour when selected
 					// Position stats
 					setText(energy_text, "ENERGY: " + Math.floor(energy));
 					energy_text.position.x = pointedAtPoint.x;
-					energy_text.position.y = pointedAtPoint.y + 1.2;
+					energy_text.position.y = height + 1.2;
 					energy_text.position.z = pointedAtPoint.z;
 					energy_text.rotation.y = Math.atan2( ( dolly.position.x - energy_text.position.x ), ( dolly.position.z - energy_text.position.z ) );
 					entities.add(energy_text);
