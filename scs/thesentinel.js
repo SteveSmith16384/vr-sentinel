@@ -43,8 +43,7 @@ export function createMap(map, SIZE) {
 }
 
 export function createCube(loader, callback) {
-	createCuboid(loader, 'textures/thesentinel/lavatile.jpg', .45, function(cube) {
-		
+	createCuboid(loader, 'textures/thesentinel/lavatile.jpg', .45, function(cube) {		
 		cube.components = {};
 		cube.components.absorb = 1;
 		cube.components.land = 1;
@@ -70,33 +69,4 @@ export function createSentinel(loader, SENTINEL_HEIGHT, callback) {
 	});
 
 }
-
-		/*var sentinel = new THREE.Geometry();
-
-		var material_front = new THREE.MeshPhongMaterial({color: 0xffffff });
-		var cube_front = createCuboidSides(0, 0, 0, 1, 0, 0);
-		cube_front.scale(.5, SENTINEL_HEIGHT*.5, .5);
-		var front = new THREE.Mesh(cube_front, material_front);
-		sentinel.mergeMesh(front);
-
-		var material_rest = new THREE.MeshPhongMaterial({color: 0xff0000 });
-		var cube_rest = createCuboidSides(1, 1, 1, 0, 1, 1);
-		cube_rest.scale(.5, SENTINEL_HEIGHT*.5, .5);
-		var rest = new THREE.Mesh(cube_rest, material_rest);
-		sentinel.mergeMesh(rest);		
-		
-				sentinel.mergeVertices(); // optional
-		sentinel.computeFaceNormals();
-		var end = new THREE.Mesh(sentinel, material);
-
-			end.components = {};
-		end.components.absorb = 1;
-		end.add(sentinel);
-		end.name = "Sentinel";
-
-		return end;
-*/
-//}
-
-
 

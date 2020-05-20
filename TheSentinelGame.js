@@ -139,33 +139,14 @@ highlight - menu change colour when selected
 		// Sentinel
 		createSentinel(obj_loader, SENTINEL_HEIGHT, function (obj) {
 			sentinel = obj;
-			/*sentinel = new THREE.Group();
 
-			var material_front = new THREE.MeshPhongMaterial({color: 0xffffff });
-			var cube_front = createCuboidSides(0, 0, 0, 1, 0, 0);
-			cube_front.scale(.5, SENTINEL_HEIGHT*.5, .5);
-			var front = new THREE.Mesh(cube_front, material_front);
-			sentinel.add(front);
-
-			var material_rest = new THREE.MeshPhongMaterial({color: 0xff0000 });
-			var cube_rest = createCuboidSides(1, 1, 1, 0, 1, 1);
-			cube_rest.scale(.5, SENTINEL_HEIGHT*.5, .5);
-			var rest = new THREE.Mesh(cube_rest, material_rest);
-			sentinel.add(rest);		
-	*/
 			var x = getRandomInt(2, SIZE-3)+.5;
 			var z = getRandomInt(2, SIZE-3)+.5;
 			var height = getHeightAtMapPoint(x, z)
 			sentinel.position.x = x;
 			sentinel.position.y = height;//+(SENTINEL_HEIGHT/2);
 			sentinel.position.z = z;
-	/*
-			sentinel.rotation.x = 0;
-			sentinel.rotation.y = 0;
-			sentinel.rotation.z = 0;
 
-			sentinel.components = {};
-			sentinel.components.absorb = 1;*/
 			entities.add(sentinel);
 	//		sentinel.name = "Sentinel";
 		});
