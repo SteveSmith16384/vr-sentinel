@@ -320,6 +320,7 @@ highlight - menu change colour when selected
 			scene.add(highlight);
 			var obj = intersects[0].object;
 			while (obj.components == undefined) {
+				console.log("Selected " + obj.name);
 				obj = obj.parent;
 			}
 			
