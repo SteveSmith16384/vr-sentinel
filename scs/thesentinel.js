@@ -45,6 +45,7 @@ export function createMap(map, SIZE) {
 export function createCube_OLD(loader, callback) {
 	createCuboid(loader, 'textures/thesentinel/lavatile.jpg', .45, function(cube) {		
 		cube.components = {};
+		cube.components.selectable = 1;
 		cube.components.absorb = 1;
 		cube.components.land = 1;
 		cube.components.build = 1;
@@ -63,6 +64,7 @@ export function createSentinel(loader, SENTINEL_HEIGHT, callback) {
 		//console.log( box.min, box.max, box.getSize() );
 
 		obj.components = {};
+		obj.components.selectable = 1;
 		obj.components.absorb = 1;
 		obj.name = "Sentinel";
 		callback(obj);
@@ -77,6 +79,7 @@ export function createTree(loader, callback) {
 		//console.log( box.min, box.max, box.getSize() );
 
 		obj.components = {};
+		obj.components.selectable = 1;
 		obj.components.absorb = 1;
 		obj.name = "Tree";
 		callback(obj);
@@ -91,6 +94,7 @@ export function createCube(loader, callback) {
 		//console.log( box.min, box.max, box.getSize() );
 
 		obj.components = {};
+		obj.components.selectable = 1;
 		obj.components.absorb = 1;
 		obj.components.land = 1;
 		obj.components.build = 1;

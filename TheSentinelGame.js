@@ -8,6 +8,7 @@ import { OBJLoader } from './jsm/loaders/OBJLoader.js';
 
 /*
 ECS Components:-
+selectable - todo - remove
 face - Always face the camera
 text - Text to show if player pointing at it.
 absorb - energy gained fom absorption
@@ -116,6 +117,7 @@ highlight - menu change colour when selected
 
 		var mapent = createMap(map, SIZE);
 		mapent.components = {};
+		mapent.components.selectable = 1;
 		mapent.components.land = true;
 		mapent.components.build = true;
 		entities.add(mapent);
@@ -158,6 +160,10 @@ highlight - menu change colour when selected
 
 			var x = getRandomInt(2, SIZE-3)+.5;
 			var z = getRandomInt(2, SIZE-3)+.5;
+			while (isMapFlat(x, z) == false) {
+				x = getRandomInt(2, SIZE-3)+.5;
+				z = getRandomInt(2, SIZE-3)+.5;
+			}
 			var height = getHeightAtMapPoint(x, z)
 			sentinel.position.x = x;
 			sentinel.position.y = height;//+(SENTINEL_HEIGHT/2);
@@ -313,6 +319,10 @@ highlight - menu change colour when selected
 		if (intersects.length > 0) {
 			scene.add(highlight);
 			var obj = intersects[0].object;
+			while (obj.components == undefined) {
+				obj = obj.parent;
+			}
+			
 			currentPointer(obj, intersects[0].point);
 			if (obj.components != undefined) {
 				if (obj.components.highlight != undefined) {
