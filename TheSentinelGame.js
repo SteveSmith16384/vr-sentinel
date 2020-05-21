@@ -311,6 +311,7 @@ highlight - menu change colour when selected
 		var intersects = raycaster.intersectObjects(entities.children, true);
 
 		if (intersects.length > 0) {
+			scene.add(highlight);
 			var obj = intersects[0].object;
 			currentPointer(obj, intersects[0].point);
 			if (obj.components != undefined) {
@@ -323,6 +324,7 @@ highlight - menu change colour when selected
 			}
 		} else {
 			//intersectedObject = undefined;
+			scene.remove(highlight);
 		}
 		
 		// Process entinel
