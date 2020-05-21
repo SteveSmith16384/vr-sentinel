@@ -42,7 +42,7 @@ export function createMap(map, SIZE) {
 		return end;
 }
 
-export function createCube(loader, callback) {
+export function createCube_OLD(loader, callback) {
 	createCuboid(loader, 'textures/thesentinel/lavatile.jpg', .45, function(cube) {		
 		cube.components = {};
 		cube.components.absorb = 1;
@@ -79,6 +79,23 @@ export function createTree(loader, callback) {
 		obj.components = {};
 		obj.components.absorb = 1;
 		obj.name = "Tree";
+		callback(obj);
+	});
+
+}
+
+export function createCube(loader, callback) {
+	loader.load("../models/block.obj", function(obj) {
+
+		//var box = new THREE.Box3().setFromObject( obj );
+		//console.log( box.min, box.max, box.getSize() );
+
+		obj.components = {};
+		obj.components.absorb = 1;
+		obj.components.land = 1;
+		obj.components.build = 1;
+		obj.components.cube = 1;
+		obj.name = "Cube";
 		callback(obj);
 	});
 

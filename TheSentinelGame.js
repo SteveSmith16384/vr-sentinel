@@ -122,13 +122,13 @@ highlight - menu change colour when selected
 
 		// Add cubes to absorb
 		for (var i=0 ; i<20 ; i++) {
-			createCube(tex_loader, function(cube) {
+			createCube(obj_loader, function(cube) {
 				var x = getRandomInt(2, SIZE-3)+.5;
 				var z = getRandomInt(2, SIZE-3)+.5;
 				if (isMapFlat(x, z)) {
 					var height = getHeightAtMapPoint(x, z)
 					cube.position.x = x;
-					cube.position.y = height+.5;
+					cube.position.y = height;//+.5;
 					cube.position.z = z;
 
 					entities.add(cube);
