@@ -1,18 +1,17 @@
 import * as THREE from '../build/three.module.js';
 import { createCuboid } from './helperfunctions.js';
 import { getRandomInt } from './numberfunctions.js';
-//import { create2DArray } from './collections.js';
+import { create2DArray } from './collections.js';
 import { createCuboidSides} from './helperfunctions.js';
 
 
 export function generateMapData() {
 		const SIZE = 40;
-		map = create2DArray(SIZE); // Array of heights of corners of each plane
-		mapflat = create2DArray(SIZE); // Array of heights of corners of each plane
+		var map = create2DArray(SIZE); // Array of heights of corners of each plane
 		for (var z=0 ; z<SIZE-1 ; z++) {
 			for (x=0 ; x<SIZE-1 ; x++) {
 				var rnd = 0;//getRandomInt(0, 4);
-				map[x][y] = rnd;
+				map[x][z] = rnd;
 			}
 		}
 		
@@ -20,17 +19,21 @@ export function generateMapData() {
 				var x = getRandomInt(0, SIZE-1);
 				var z = getRandomInt(0, SIZE-1);
 				var rad  = getRandomInt(2, 10);
-				raiseMap(map, x, z, rad);
+				raiseMap(map, SIZE, x, z, rad);
 		}
 		
 		return map;
 }
 
 
-function raiseMap(map, sx, sz, rad) {
+function raiseMap(map, SIZE, sx, sz, rad) {
 		for (var z=sz ; z<sz+rad ; z++) {
+			if (z>=0 && z < SIZE) {
 			for (var x=sx ; x<sx+rad ; x++) {
-				map[x][y]++;
+			if (x>=0 && x < SIZE) {
+				map[x][z]++;
+			}
+			}
 			}
 		}
 }

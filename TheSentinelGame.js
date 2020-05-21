@@ -28,7 +28,6 @@ highlight - menu change colour when selected
 	var tex_loader = undefined; // Texture loader
 	var obj_loader = undefined; // Texture loader
 	var map = undefined;
-	var mapflat = undefined;
 	var entities = undefined; // Anything that can be selected
 	
 	var selectedObject; // The object the player has clicked on
@@ -100,10 +99,9 @@ highlight - menu change colour when selected
 		});
 
 		// Generate map
-		/*const SIZE = 40;
-		var x, y;
+		const SIZE = 40;
+		/*var x, y;
 		map = create2DArray(SIZE); // Array of heights of corners of each plane
-		mapflat = create2DArray(SIZE); // Array of heights of corners of each plane
 		for (y=0 ; y<SIZE-1 ; y+=2) {
 			for (x=0 ; x<SIZE-1 ; x+=2) {
 				var rnd = getRandomInt(0, 4);
