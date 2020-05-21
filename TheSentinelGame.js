@@ -1,6 +1,6 @@
 import * as THREE from './build/three.module.js';
 //import { createBillboard, createText } from './scs/helperfunctions.js';
-import { createMap, createCube, createSentinel } from './scs/thesentinel.js';
+import { createMap, createCube, createSentinel, createTree } from './scs/thesentinel.js';
 import { create2DArray } from './scs/collections.js';
 import { getRandomInt } from './scs/numberfunctions.js';
 import { createPlane_NoTex, createCuboid, createCuboidSides, createText, setText } from './scs/helperfunctions.js';
@@ -132,6 +132,22 @@ highlight - menu change colour when selected
 					cube.position.z = z;
 
 					entities.add(cube);
+				}
+			});
+		}
+
+		// Add trees to absorb
+		for (var i=0 ; i<20 ; i++) {
+			createTree(obj_loader, function(tree) {
+				var x = getRandomInt(2, SIZE-3)+.5;
+				var z = getRandomInt(2, SIZE-3)+.5;
+				if (isMapFlat(x, z)) {
+					var height = getHeightAtMapPoint(x, z)
+					tree.position.x = x;
+					tree.position.y = height;
+					tree.position.z = z;
+
+					entities.add(tree);
 				}
 			});
 		}
@@ -292,7 +308,7 @@ highlight - menu change colour when selected
 		tempMatrix.identity().extractRotation( controller.matrixWorld );
 		raycaster.ray.origin.setFromMatrixPosition( controller.matrixWorld );
 		raycaster.ray.direction.set( 0, 0, -1 ).applyMatrix4( tempMatrix );
-		var intersects = raycaster.intersectObjects(entities.children);
+		var intersects = raycaster.intersectObjects(entities.children, true);
 
 		if (intersects.length > 0) {
 			var obj = intersects[0].object;

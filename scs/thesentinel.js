@@ -70,3 +70,17 @@ export function createSentinel(loader, SENTINEL_HEIGHT, callback) {
 
 }
 
+export function createTree(loader, callback) {
+	loader.load("../models/tree_europe.obj", function(obj) {
+
+		//var box = new THREE.Box3().setFromObject( obj );
+		//console.log( box.min, box.max, box.getSize() );
+
+		obj.components = {};
+		obj.components.absorb = 1;
+		obj.name = "Tree";
+		callback(obj);
+	});
+
+}
+
