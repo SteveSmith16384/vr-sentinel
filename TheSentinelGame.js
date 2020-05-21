@@ -20,7 +20,7 @@ highlight - menu change colour when selected
 	// Settings
 	const sentinelView = Math.PI / 8;
 	const SENTINEL_HEIGHT = 2;
-	const PLAYER_HEIGHT = .1;
+	const PLAYER_HEIGHT = 0;//.1;
 	const START_ENERGY = 3;
 	
 	// Other vars
@@ -320,7 +320,11 @@ highlight - menu change colour when selected
 			var obj = intersects[0].object;
 			while (obj.components == undefined) {
 				console.log("Selected " + obj.name);
-				obj = obj.parent;
+				if (obj.parent != undefined) {
+					obj = obj.parent;
+				} else {
+					break;
+				}
 			}
 			
 			currentPointer(obj, intersects[0].point);
@@ -387,7 +391,7 @@ highlight - menu change colour when selected
 				raycaster.ray.direction.y = vecNrm.y;
 				raycaster.ray.direction.z = vecNrm.z;
 				
-				var intersects = raycaster.intersectObjects(entities.children);
+				var intersects = raycaster.intersectObjects(entities.children, true);
 				if (intersects.length == 0) {
 					seenBySentinel(delta);
 				} else if (intersects.length > 0) {
@@ -433,7 +437,7 @@ highlight - menu change colour when selected
 		raycaster.ray.origin.z = z;
 		raycaster.ray.direction.set( 0, -1, 0 );
 
-		var intersects = raycaster.intersectObjects(entities.children);
+		var intersects = raycaster.intersectObjects(entities.children, true);
 
 		return intersects[0].point.y;
 	}
