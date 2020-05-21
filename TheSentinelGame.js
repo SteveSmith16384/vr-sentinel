@@ -1,9 +1,8 @@
 import * as THREE from './build/three.module.js';
-//import { createBillboard, createText } from './scs/helperfunctions.js';
-import { createMap, createCube, createSentinel, createTree } from './scs/thesentinel.js';
+import { generateMapData, createMap, createCube, createSentinel, createTree } from './scs/thesentinel.js';
 import { create2DArray } from './scs/collections.js';
 import { getRandomInt } from './scs/numberfunctions.js';
-import { createPlane_NoTex, createCuboid, createCuboidSides, createText, setText } from './scs/helperfunctions.js';
+import { createCuboid, createText, setText } from './scs/helperfunctions.js';
 import { OBJLoader } from './jsm/loaders/OBJLoader.js';
 
 /*
@@ -101,7 +100,7 @@ highlight - menu change colour when selected
 		});
 
 		// Generate map
-		const SIZE = 40;
+		/*const SIZE = 40;
 		var x, y;
 		map = create2DArray(SIZE); // Array of heights of corners of each plane
 		mapflat = create2DArray(SIZE); // Array of heights of corners of each plane
@@ -113,7 +112,9 @@ highlight - menu change colour when selected
 				map[x][y+1] = rnd;
 				map[x+1][y+1] = rnd;
 			}
-		}
+		}*/
+		
+		map = generateMapData();
 
 		var mapent = createMap(map, SIZE);
 		mapent.components = {};
