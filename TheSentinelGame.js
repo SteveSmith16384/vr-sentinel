@@ -35,6 +35,7 @@ highlight - menu change colour when selected
 	var selectedObject; // The object the player has clicked on
 	var pointedAtObject; // The object the player is pointing at
 	var pointedAtPoint; // Where the player is currently pointing
+	var refinedSelectedPoint;
 	
 	var highlight = undefined;
 	var sentinel = undefined;
@@ -155,17 +156,6 @@ highlight - menu change colour when selected
 		createSentinel(obj_loader, function (obj) {
 			sentinel = obj;
 
-			/*var x = getRandomInt(2, SIZE-3)+.5;
-			var z = getRandomInt(2, SIZE-3)+.5;
-			while (isMapFlat(x, z) == false) {
-				x = getRandomInt(2, SIZE-3)+.5;
-				z = getRandomInt(2, SIZE-3)+.5;
-			}
-			var height = getHeightAtMapPoint(x, z)
-			sentinel.position.x = x;
-			sentinel.position.y = height;
-			sentinel.position.z = z;*/
-
 			entities.add(obj);
 			setHighestPoint(obj, map, SIZE);
 		});
@@ -222,7 +212,6 @@ highlight - menu change colour when selected
 			var s = pointedAtObject;
 			// Was it a menu item?
 			if (s == menu_absorb) {
-				//console.log("Clicked on absorb");
 				entities.remove(menu_absorb.components.object);
 				if (menu_absorb.components.object == sentinel) {
 					entities.remove(map);
@@ -272,7 +261,6 @@ highlight - menu change colour when selected
 				// Clicked on a world object
 				selectedObject = pointedAtObject;
 				if (s.components) {
-					//console.log("Has components!");
 					if (s.components.absorb != undefined) {
 						menu_absorb.components.object = selectedObject;
 						menu_absorb.position.x = pointedAtPoint.x;
@@ -285,15 +273,19 @@ highlight - menu change colour when selected
 						if (DEBUG || energy > 0) {
 							// Check we can see the top
 							if (s.components.cube != undefined || height-1 <= dolly.position.y) {
-								if (isMapFlat(pointedAtPoint.x, pointedAtPoint.z)) {
-									if (s == mapent) {
+								var canLand = false;
+								if (s == mapent) {
+									if (isMapFlat(pointedAtPoint.x, pointedAtPoint.z)) {
+										canLand = true;
 										menu_teleport.components.position.x = Math.floor(pointedAtPoint.x) + .5;
 										menu_teleport.components.position.z = Math.floor(pointedAtPoint.z) + .5;
-									} else {
-										menu_teleport.components.position.x = Math.floor(s.position.x) + .5;
-										menu_teleport.components.position.z = Math.floor(s.position.z) + .5;
 									}
-									//menu_teleport.components.position.y = height;
+								} else {
+									canLand = true;
+									menu_teleport.components.position.x = Math.floor(s.position.x) + .5;
+									menu_teleport.components.position.z = Math.floor(s.position.z) + .5;
+								}
+								if (canLand) {
 									menu_teleport.position.x = pointedAtPoint.x;
 									menu_teleport.position.y = height + .6;
 									menu_teleport.position.z = pointedAtPoint.z;
@@ -307,16 +299,19 @@ highlight - menu change colour when selected
 						if (DEBUG || energy > 0) {
 							// Check we can see the top
 							if (s.components.cube != undefined || height-1 <= dolly.position.y) {
-								if (isMapFlat(pointedAtPoint.x, pointedAtPoint.z)) {
-									if (s == mapent) {
+								var canBuild = false;
+								if (s == mapent) {
+									if (isMapFlat(pointedAtPoint.x, pointedAtPoint.z)) {
+										canBuild = true;
 										menu_build_cube.components.position.x = Math.floor(pointedAtPoint.x) + .5;
 										menu_build_cube.components.position.z = Math.floor(pointedAtPoint.z) + .5;
-									} else {
-										menu_build_cube.components.position.x = Math.floor(s.position.x) + .5;
-										menu_build_cube.components.position.z = Math.floor(s.position.z) + .5;
 									}
-									//menu_build_cube.components.position.y = pointedAtPoint.y;
-									
+								} else {
+									canBuild = true;
+									menu_build_cube.components.position.x = Math.floor(s.position.x) + .5;
+									menu_build_cube.components.position.z = Math.floor(s.position.z) + .5;
+								}
+								if (canBuild) {
 									menu_build_cube.position.x = pointedAtPoint.x;
 									menu_build_cube.position.y = height + .9;
 									menu_build_cube.position.z = pointedAtPoint.z;
@@ -430,7 +425,6 @@ highlight - menu change colour when selected
 			
 			if (Math.abs(diff) < sentinelView) {
 				directionalLight.color.setHex(0xffff00);
-				//console.log("Can See!");
 				
 				// Can Sentinel actually see player?
 				raycaster.ray.origin.x = sentinel.position.x;
@@ -454,7 +448,6 @@ highlight - menu change colour when selected
 						seenBySentinel(delta);
 					}
 				}
-			} else {
 			}
 		}
 
@@ -538,5 +531,40 @@ highlight - menu change colour when selected
 		if (energy < 0) {
 			energy = 0;
 		}
+	}
+	
+	
+	function getRefinedSelectedPoint(selectedPoint) {
+		var point = new THREE.Vector3();
+		
+		raycaster.ray.origin.x = selectedPoint.x;
+		raycaster.ray.origin.y = 100;
+		raycaster.ray.origin.z = selectedPoint.z;
+		raycaster.ray.direction.set( 0, -1, 0 );
+
+		var intersects = raycaster.intersectObjects(entities.children, true);
+
+		if (intersects.length > 0) {
+			var obj = intersects[0].object;
+			while (obj.components == undefined) {
+				//console.log("Selected " + obj.name);
+				if (obj.parent != undefined) {
+					obj = obj.parent;
+				} else {
+					break;
+				}
+			}
+
+			point.y = intersects[0].point.y;
+			
+			if (obj == mapent) {
+				point.x = Math.floor(selectedPoint.x) + .5;
+				point.z = Math.floor(selectedPoint.z) + .5;
+			} else {
+				point.x = obj.position.x;
+				point.z = obj.position.z;
+			}
+		}
+		return point;
 	}
 	
