@@ -164,11 +164,10 @@ highlight - menu change colour when selected
 			}
 			var height = getHeightAtMapPoint(x, z)
 			sentinel.position.x = x;
-			sentinel.position.y = height;//+(SENTINEL_HEIGHT/2);
+			sentinel.position.y = height;
 			sentinel.position.z = z;
 
 			entities.add(sentinel);
-	//		sentinel.name = "Sentinel";
 		});
 
 		// Set player start position
