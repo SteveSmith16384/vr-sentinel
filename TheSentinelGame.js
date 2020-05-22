@@ -7,7 +7,6 @@ import { OBJLoader } from './jsm/loaders/OBJLoader.js';
 
 /*
 ECS Components:-
-selectable - todo - remove
 face - Always face the camera
 text - Text to show if player pointing at it.
 absorb - energy gained fom absorption
@@ -18,6 +17,7 @@ highlight - menu change colour when selected
 */
 
 	// Settings
+	const DEBUG = true;
 	const sentinelView = Math.PI / 8;
 	const SENTINEL_HEIGHT = 2;
 	const PLAYER_HEIGHT = 0;//.1;
@@ -99,7 +99,7 @@ highlight - menu change colour when selected
 		});
 
 		// Generate map
-		const SIZE = 40;
+		const SIZE = 60;
 		/*var x, y;
 		map = create2DArray(SIZE); // Array of heights of corners of each plane
 		for (y=0 ; y<SIZE-1 ; y+=2) {
@@ -112,11 +112,10 @@ highlight - menu change colour when selected
 			}
 		}*/
 		
-		map = generateMapData();
+		map = generateMapData(SIZE);
 
 		var mapent = createMap(map, SIZE);
 		mapent.components = {};
-		mapent.components.selectable = 1;
 		mapent.components.land = true;
 		mapent.components.build = true;
 		entities.add(mapent);
@@ -217,7 +216,7 @@ highlight - menu change colour when selected
 				incEnergy(-1);
 				removeMenu();
 			} else if (s == menu_build_cube) {
-				createCube(tex_loader, function(cube) {
+				createCube(obj_loader, function(cube) {
 					var x = Math.floor(menu_build_cube.components.position.x) + .5;
 					var z = Math.floor(menu_build_cube.components.position.z) + .5;
 					var height = getHeightAtMapPoint(x, z)
@@ -246,7 +245,7 @@ highlight - menu change colour when selected
 						entities.add(menu_absorb);						
 					}
 					if (s.components.land != undefined && pointedAtPoint != undefined) {
-						if (energy > 0) {
+						if (DEBUG || energy > 0) {
 							// Check we can see the top
 							if (s.components.cube != undefined || height-1 <= dolly.position.y) {
 								if (isMapFlat(pointedAtPoint.x, pointedAtPoint.z)) {
@@ -263,7 +262,7 @@ highlight - menu change colour when selected
 						}
 					}
 					if (s.components.build != undefined && pointedAtPoint != undefined) {
-						if (energy > 0) {
+						if (DEBUG || energy > 0) {
 							// Check we can see the top
 							if (s.components.cube != undefined || height-1 <= dolly.position.y) {
 								if (isMapFlat(pointedAtPoint.x, pointedAtPoint.z)) {

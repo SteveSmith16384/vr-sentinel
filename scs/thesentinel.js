@@ -5,37 +5,36 @@ import { create2DArray } from './collections.js';
 import { createCuboidSides} from './helperfunctions.js';
 
 
-export function generateMapData() {
-		const SIZE = 40;
-		var map = create2DArray(SIZE); // Array of heights of corners of each plane
-		for (var z=0 ; z<SIZE-1 ; z++) {
-			for (x=0 ; x<SIZE-1 ; x++) {
-				var rnd = 0;//getRandomInt(0, 4);
-				map[x][z] = rnd;
-			}
+export function generateMapData(SIZE) {
+	var map = create2DArray(SIZE); // Array of heights of corners of each plane
+	for (var z=0 ; z<SIZE-1 ; z++) {
+		for (x=0 ; x<SIZE-1 ; x++) {
+			var rnd = 0;//getRandomInt(0, 4);
+			map[x][z] = rnd;
 		}
-		
-		for (var i=0 ; i<10 ; i++) {
-				var x = getRandomInt(0, SIZE-1);
-				var z = getRandomInt(0, SIZE-1);
-				var rad  = getRandomInt(2, 10);
-				raiseMap(map, SIZE, x, z, rad);
-		}
-		
-		return map;
+	}
+	
+	for (var i=0 ; i<50 ; i++) {
+			var x = getRandomInt(0, SIZE-1);
+			var z = getRandomInt(0, SIZE-1);
+			var rad  = getRandomInt(2, SIZE/3);
+			raiseMap(map, SIZE, x, z, rad);
+	}
+	
+	return map;
 }
 
 
 function raiseMap(map, SIZE, sx, sz, rad) {
-		for (var z=sz ; z<sz+rad ; z++) {
-			if (z>=0 && z < SIZE) {
+	for (var z=sz ; z<sz+rad ; z++) {
+		if (z>=0 && z < SIZE) {
 			for (var x=sx ; x<sx+rad ; x++) {
-			if (x>=0 && x < SIZE) {
-				map[x][z]++;
-			}
-			}
+				if (x>=0 && x < SIZE) {
+					map[x][z]++;
+				}
 			}
 		}
+	}
 }
 
 
@@ -81,7 +80,6 @@ export function createMap(map, SIZE) {
 export function createCube_OLD(loader, callback) {
 	createCuboid(loader, 'textures/thesentinel/lavatile.jpg', .45, function(cube) {		
 		cube.components = {};
-		cube.components.selectable = 1;
 		cube.components.absorb = 1;
 		cube.components.land = 1;
 		cube.components.build = 1;
@@ -100,7 +98,6 @@ export function createSentinel(loader, SENTINEL_HEIGHT, callback) {
 		//console.log( box.min, box.max, box.getSize() );
 
 		obj.components = {};
-		obj.components.selectable = 1;
 		obj.components.absorb = 1;
 		obj.name = "Sentinel";
 		callback(obj);
@@ -115,7 +112,6 @@ export function createTree(loader, callback) {
 		//console.log( box.min, box.max, box.getSize() );
 
 		obj.components = {};
-		obj.components.selectable = 1;
 		obj.components.absorb = 1;
 		obj.name = "Tree";
 		callback(obj);
@@ -130,7 +126,6 @@ export function createCube(loader, callback) {
 		//console.log( box.min, box.max, box.getSize() );
 
 		obj.components = {};
-		obj.components.selectable = 1;
 		obj.components.absorb = 1;
 		obj.components.land = 1;
 		obj.components.build = 1;
