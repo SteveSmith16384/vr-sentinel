@@ -17,6 +17,7 @@ highlight - menu change colour when selected
 */
 
 	// Settings
+	const SIZE = 60;
 	const DEBUG = true;
 	const sentinelView = Math.PI / 8;
 	const SENTINEL_HEIGHT = 2;
@@ -29,6 +30,7 @@ highlight - menu change colour when selected
 	var obj_loader = undefined; // Texture loader
 	var map = undefined;
 	var entities = undefined; // Anything that can be selected
+	var mapent;
 	
 	var selectedObject; // The object the player has clicked on
 	var pointedAtObject; // The object the player is pointing at
@@ -72,7 +74,7 @@ highlight - menu change colour when selected
 		scene.background = new THREE.Color( 0x666666 );
 
 		// Create menu items
-		menu_teleport = createText("TELEPORT");
+		menu_teleport = createText("TELEPORT HERE");
 		menu_teleport.components = {};
 		menu_teleport.components.highlight = 1;
 		menu_teleport.components.position = new THREE.Vector3();
@@ -83,13 +85,13 @@ highlight - menu change colour when selected
 		menu_absorb.components.highlight = 1;
 		menuitems.push(menu_absorb);
 
-		menu_build_cube = createText("CUBE");
+		menu_build_cube = createText("CREATE CUBE");
 		menu_build_cube.components = {};
 		menu_build_cube.components.highlight = 1;
 		menu_build_cube.components.position = new THREE.Vector3();
 		menuitems.push(menu_build_cube);
 
-		menu_build_tree = createText("TREE");
+		menu_build_tree = createText("CREATE TREE");
 		menu_build_tree.components = {};
 		menu_build_tree.components.highlight = 1;
 		menu_build_tree.components.position = new THREE.Vector3();
@@ -105,23 +107,9 @@ highlight - menu change colour when selected
 			scene.add(cube);
 		});
 
-		// Generate map
-		const SIZE = 60;
-		/*var x, y;
-		map = create2DArray(SIZE); // Array of heights of corners of each plane
-		for (y=0 ; y<SIZE-1 ; y+=2) {
-			for (x=0 ; x<SIZE-1 ; x+=2) {
-				var rnd = getRandomInt(0, 4);
-				map[x][y] = rnd;
-				map[x+1][y] = rnd;
-				map[x][y+1] = rnd;
-				map[x+1][y+1] = rnd;
-			}
-		}*/
-		
 		map = generateMapData(SIZE);
 
-		var mapent = createMap(map, SIZE);
+		mapent = createMap(map, SIZE);
 		mapent.components = {};
 		mapent.components.land = true;
 		mapent.components.build = true;
@@ -133,12 +121,14 @@ highlight - menu change colour when selected
 				var x = getRandomInt(2, SIZE-3)+.5;
 				var z = getRandomInt(2, SIZE-3)+.5;
 				if (isMapFlat(x, z)) {
+					if (isMapEmpty(x, z)) {
 					var height = getHeightAtMapPoint(x, z)
 					cube.position.x = x;
 					cube.position.y = height;//+.5;
 					cube.position.z = z;
 
 					entities.add(cube);
+				}
 				}
 			});
 		}
@@ -149,12 +139,14 @@ highlight - menu change colour when selected
 				var x = getRandomInt(2, SIZE-3)+.5;
 				var z = getRandomInt(2, SIZE-3)+.5;
 				if (isMapFlat(x, z)) {
+					if (isMapEmpty(x, z)) {
 					var height = getHeightAtMapPoint(x, z)
 					tree.position.x = x;
 					tree.position.y = height;
 					tree.position.z = z;
 
 					entities.add(tree);
+					}
 				}
 			});
 		}
@@ -163,7 +155,7 @@ highlight - menu change colour when selected
 		createSentinel(obj_loader, SENTINEL_HEIGHT, function (obj) {
 			sentinel = obj;
 
-			var x = getRandomInt(2, SIZE-3)+.5;
+			/*var x = getRandomInt(2, SIZE-3)+.5;
 			var z = getRandomInt(2, SIZE-3)+.5;
 			while (isMapFlat(x, z) == false) {
 				x = getRandomInt(2, SIZE-3)+.5;
@@ -172,9 +164,10 @@ highlight - menu change colour when selected
 			var height = getHeightAtMapPoint(x, z)
 			sentinel.position.x = x;
 			sentinel.position.y = height;
-			sentinel.position.z = z;
+			sentinel.position.z = z;*/
 
-			entities.add(sentinel);
+			entities.add(obj);
+			setHighestPoint(obj, map, SIZE);
 		});
 
 		// Set player start position
@@ -186,6 +179,29 @@ highlight - menu change colour when selected
 		dolly.position.z = z;
 	}
 	
+
+	function setHighestPoint() {
+		var hx=0, hz=0, highest=0;
+		for (var z=0 ; z<SIZE-1 ; z++) {
+			for (var x=0 ; x<SIZE-1 ; x++) {
+				if (isMapFlat(x, z)) {
+					if (isMapEmpty(x, z)) {
+						var h = getHeightAtMapPoint(x, z);
+						if (h > highest) {
+							highest = h;
+							hx = x;
+							hz = z;
+						}
+					}
+				}
+			}
+		}
+		sentinel.position.x = hx;
+		sentinel.position.y = highest;
+		sentinel.position.z = hz;
+		
+	}
+
 
 	function currentPointer(object, point) {
 		pointedAtObject = object;
@@ -227,7 +243,7 @@ highlight - menu change colour when selected
 					var z = Math.floor(menu_build_cube.components.position.z) + .5;
 					var height = getHeightAtMapPoint(x, z)
 					cube.position.x = x;
-					cube.position.y = height + .5;
+					cube.position.y = height;
 					cube.position.z = z;
 					entities.add(cube);
 					incEnergy(-1);
@@ -300,7 +316,7 @@ highlight - menu change colour when selected
 									menu_build_tree.components.position.z = Math.floor(pointedAtPoint.z) + .5;
 									
 									menu_build_tree.position.x = pointedAtPoint.x;
-									menu_build_tree.position.y = height + .12;
+									menu_build_tree.position.y = height + 1.2;
 									menu_build_tree.position.z = pointedAtPoint.z;
 									menu_build_tree.rotation.y = Math.atan2( ( dolly.position.x - menu_build_cube.position.x ), ( dolly.position.z - menu_build_cube.position.z ) );
 									entities.add(menu_build_tree);
@@ -468,6 +484,18 @@ highlight - menu change colour when selected
 		var intersects = raycaster.intersectObjects(entities.children, true);
 
 		return intersects[0].point.y;
+	}
+	
+	
+	function isMapEmpty(x, z) {
+		raycaster.ray.origin.x = x;
+		raycaster.ray.origin.y = 100;
+		raycaster.ray.origin.z = z;
+		raycaster.ray.direction.set( 0, -1, 0 );
+
+		var intersects = raycaster.intersectObjects(entities.children, true);
+
+		return intersects[0].object == mapent;
 	}
 	
 	

@@ -8,7 +8,7 @@ import { createCuboidSides} from './helperfunctions.js';
 export function generateMapData(SIZE) {
 	var map = create2DArray(SIZE); // Array of heights of corners of each plane
 	for (var z=0 ; z<SIZE-1 ; z++) {
-		for (x=0 ; x<SIZE-1 ; x++) {
+		for (var x=0 ; x<SIZE-1 ; x++) {
 			var rnd = 0;//getRandomInt(0, 4);
 			map[x][z] = rnd;
 		}
@@ -35,6 +35,24 @@ function raiseMap(map, SIZE, sx, sz, rad) {
 			}
 		}
 	}
+}
+
+
+export function setHighestPoint(sentinel, map, SIZE) {
+	var hx, hz, height=0;
+	for (var z=0 ; z<SIZE-1 ; z++) {
+		for (var x=0 ; x<SIZE-1 ; x++) {
+			if (map[x][z] > height) {
+				height = map[x][z];
+				hx = x;
+				hz = z;
+			}
+		}
+	}
+	sentinel.position.x = hx;
+	sentinel.position.y = height;
+	sentinel.position.z = hz;
+	
 }
 
 
@@ -74,20 +92,6 @@ export function createMap(map, SIZE) {
 		var end = new THREE.Mesh(geom, material);
 		end.name = "Global_map";
 		return end;
-}
-
-
-export function createCube_OLD(loader, callback) {
-	createCuboid(loader, 'textures/thesentinel/lavatile.jpg', .45, function(cube) {		
-		cube.components = {};
-		cube.components.absorb = 1;
-		cube.components.land = 1;
-		cube.components.build = 1;
-		cube.components.cube = 1;
-		
-		cube.name = "Cube";
-		callback(cube);
-	});
 }
 
 
