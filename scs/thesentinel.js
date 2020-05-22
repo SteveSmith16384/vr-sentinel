@@ -38,24 +38,6 @@ function raiseMap(map, SIZE, sx, sz, rad) {
 }
 
 
-export function setHighestPoint(sentinel, map, SIZE) {
-	var hx, hz, height=0;
-	for (var z=0 ; z<SIZE-1 ; z++) {
-		for (var x=0 ; x<SIZE-1 ; x++) {
-			if (map[x][z] > height) {
-				height = map[x][z];
-				hx = x;
-				hz = z;
-			}
-		}
-	}
-	sentinel.position.x = hx;
-	sentinel.position.y = height;
-	sentinel.position.z = hz;
-	
-}
-
-
 export function createMap(map, SIZE) {
 		var geom = new THREE.Geometry();
 		var material = new THREE.MeshPhongMaterial({color: 0xffffff });
@@ -95,7 +77,7 @@ export function createMap(map, SIZE) {
 }
 
 
-export function createSentinel(loader, SENTINEL_HEIGHT, callback) {
+export function createSentinel(loader, callback) {
 	loader.load("../models/sentinel.obj", function(obj) {
 
 		//var box = new THREE.Box3().setFromObject( obj );

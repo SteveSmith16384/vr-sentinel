@@ -152,7 +152,7 @@ highlight - menu change colour when selected
 		}
 
 		// Sentinel
-		createSentinel(obj_loader, SENTINEL_HEIGHT, function (obj) {
+		createSentinel(obj_loader, function (obj) {
 			sentinel = obj;
 
 			/*var x = getRandomInt(2, SIZE-3)+.5;
@@ -182,8 +182,8 @@ highlight - menu change colour when selected
 
 	function setHighestPoint() {
 		var hx=0, hz=0, highest=0;
-		for (var z=0 ; z<SIZE-1 ; z++) {
-			for (var x=0 ; x<SIZE-1 ; x++) {
+		for (var z=0 ; z<SIZE/2-1 ; z++) {
+			for (var x=0 ; x<SIZE/2-1 ; x++) {
 				if (isMapFlat(x, z)) {
 					if (isMapEmpty(x, z)) {
 						var h = getHeightAtMapPoint(x, z);
@@ -232,9 +232,11 @@ highlight - menu change colour when selected
 				removeMenu();
 			} else if (s == menu_teleport) {
 				//console.log("Clicked on teleport");
-				dolly.position.x = menu_teleport.components.position.x;
-				dolly.position.y = menu_teleport.components.position.y + PLAYER_HEIGHT;
-				dolly.position.z = menu_teleport.components.position.z;
+				var x = menu_teleport.components.position.x;
+				var z = menu_teleport.components.position.z;
+				dolly.position.x = x;
+				dolly.position.z = z;
+				dolly.position.y = getHeightAtMapPoint(x, z);
 				incEnergy(-1);
 				removeMenu();
 			} else if (s == menu_build_cube) {
@@ -284,9 +286,14 @@ highlight - menu change colour when selected
 							// Check we can see the top
 							if (s.components.cube != undefined || height-1 <= dolly.position.y) {
 								if (isMapFlat(pointedAtPoint.x, pointedAtPoint.z)) {
-									menu_teleport.components.position.x = Math.floor(pointedAtPoint.x) + .5;
-									menu_teleport.components.position.z = Math.floor(pointedAtPoint.z) + .5;
-									menu_teleport.components.position.y = height;
+									if (s == mapent) {
+										menu_teleport.components.position.x = Math.floor(pointedAtPoint.x) + .5;
+										menu_teleport.components.position.z = Math.floor(pointedAtPoint.z) + .5;
+									} else {
+										menu_teleport.components.position.x = Math.floor(s.position.x) + .5;
+										menu_teleport.components.position.z = Math.floor(s.position.z) + .5;
+									}
+									//menu_teleport.components.position.y = height;
 									menu_teleport.position.x = pointedAtPoint.x;
 									menu_teleport.position.y = height + .6;
 									menu_teleport.position.z = pointedAtPoint.z;
@@ -301,9 +308,14 @@ highlight - menu change colour when selected
 							// Check we can see the top
 							if (s.components.cube != undefined || height-1 <= dolly.position.y) {
 								if (isMapFlat(pointedAtPoint.x, pointedAtPoint.z)) {
-									menu_build_cube.components.position.x = Math.floor(pointedAtPoint.x) + .5;
-									menu_build_cube.components.position.y = pointedAtPoint.y;
-									menu_build_cube.components.position.z = Math.floor(pointedAtPoint.z) + .5;
+									if (s == mapent) {
+										menu_build_cube.components.position.x = Math.floor(pointedAtPoint.x) + .5;
+										menu_build_cube.components.position.z = Math.floor(pointedAtPoint.z) + .5;
+									} else {
+										menu_build_cube.components.position.x = Math.floor(s.position.x) + .5;
+										menu_build_cube.components.position.z = Math.floor(s.position.z) + .5;
+									}
+									//menu_build_cube.components.position.y = pointedAtPoint.y;
 									
 									menu_build_cube.position.x = pointedAtPoint.x;
 									menu_build_cube.position.y = height + .9;
@@ -405,7 +417,6 @@ highlight - menu change colour when selected
 			while (angleStoP < -Math.PI) {
 				angleStoP += Math.PI*2;
 			}
-			//console.log("angleStoP2=" + angleStoP);
 
 			let diff = -sentinel.rotation.y - angleStoP;
 			while (diff < -Math.PI) {
@@ -414,7 +425,6 @@ highlight - menu change colour when selected
 			while (diff > Math.PI) {
 				diff -= Math.PI*2;
 			}
-			//console.log("Diff = " + diff);
 			
 			directionalLight.color.setHex(0x00ff00);
 			
@@ -424,7 +434,7 @@ highlight - menu change colour when selected
 				
 				// Can Sentinel actually see player?
 				raycaster.ray.origin.x = sentinel.position.x;
-				raycaster.ray.origin.y = sentinel.position.y + (SENTINEL_HEIGHT/2);
+				raycaster.ray.origin.y = sentinel.position.y + (SENTINEL_HEIGHT);
 				raycaster.ray.origin.z = sentinel.position.z;
 				
 				var vecToPlayer = new THREE.Vector3(dolly.position.x-sentinel.position.x, dolly.position.y-sentinel.position.y, dolly.position.z-sentinel.position.z);
