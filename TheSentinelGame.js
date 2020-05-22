@@ -47,6 +47,7 @@ highlight - menu change colour when selected
 	var menuitems = [];
 	var menu_absorb;
 	var menu_build_cube;
+	var menu_build_tree;
 	var menu_teleport;
 
 	export function initGame(_scene, _dolly) {
@@ -87,6 +88,12 @@ highlight - menu change colour when selected
 		menu_build_cube.components.highlight = 1;
 		menu_build_cube.components.position = new THREE.Vector3();
 		menuitems.push(menu_build_cube);
+
+		menu_build_tree = createText("TREE");
+		menu_build_tree.components = {};
+		menu_build_tree.components.highlight = 1;
+		menu_build_tree.components.position = new THREE.Vector3();
+		menuitems.push(menu_build_tree);
 
 		energy_text = createText("ENERGY: " + energy);
 		menuitems.push(energy_text);
@@ -227,6 +234,19 @@ highlight - menu change colour when selected
 				});
 
 				removeMenu();
+			} else if (s == menu_build_tree) {
+				createTree(obj_loader, function(tree) {
+					var x = Math.floor(menu_build_tree.components.position.x) + .5;
+					var z = Math.floor(menu_build_tree.components.position.z) + .5;
+					var height = getHeightAtMapPoint(x, z)
+					tree.position.x = x;
+					tree.position.y = height;
+					tree.position.z = z;
+					entities.add(tree);
+					incEnergy(-1);
+				});
+
+				removeMenu();
 			} else {
 				var height = getHeightAtMapPoint(pointedAtPoint.x, pointedAtPoint.z);
 
@@ -274,6 +294,16 @@ highlight - menu change colour when selected
 									menu_build_cube.position.z = pointedAtPoint.z;
 									menu_build_cube.rotation.y = Math.atan2( ( dolly.position.x - menu_build_cube.position.x ), ( dolly.position.z - menu_build_cube.position.z ) );
 									entities.add(menu_build_cube);
+
+									menu_build_tree.components.position.x = Math.floor(pointedAtPoint.x) + .5;
+									menu_build_tree.components.position.y = pointedAtPoint.y;
+									menu_build_tree.components.position.z = Math.floor(pointedAtPoint.z) + .5;
+									
+									menu_build_tree.position.x = pointedAtPoint.x;
+									menu_build_tree.position.y = height + .12;
+									menu_build_tree.position.z = pointedAtPoint.z;
+									menu_build_tree.rotation.y = Math.atan2( ( dolly.position.x - menu_build_cube.position.x ), ( dolly.position.z - menu_build_cube.position.z ) );
+									entities.add(menu_build_tree);
 								}
 							}
 						}
@@ -282,7 +312,7 @@ highlight - menu change colour when selected
 					// Position stats
 					setText(energy_text, "ENERGY: " + Math.floor(energy));
 					energy_text.position.x = pointedAtPoint.x;
-					energy_text.position.y = height + 1.2;
+					energy_text.position.y = height + 1.5;
 					energy_text.position.z = pointedAtPoint.z;
 					energy_text.rotation.y = Math.atan2( ( dolly.position.x - energy_text.position.x ), ( dolly.position.z - energy_text.position.z ) );
 					entities.add(energy_text);
