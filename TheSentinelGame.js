@@ -38,8 +38,11 @@ highlight - menu change colour when selected
 	
 	var highlight = undefined;
 	var sentinel = undefined;
-	var energy = START_ENERGY;
+	var energy;
 	var energy_text;
+	var player_moved;
+	var level = 0;
+	var sentinalSeenPlayer;
 	
 	var tempMatrix = new THREE.Matrix4();
 	var raycaster = new THREE.Raycaster();
@@ -52,7 +55,6 @@ highlight - menu change colour when selected
 	var menu_build_tree;
 	var menu_teleport;
 	
-	var player_moved = false;
 
 	export function initGame(_scene, _dolly) {
 		scene = _scene;
@@ -112,6 +114,11 @@ highlight - menu change colour when selected
 			scene.remove(entities);
 		}
 		
+		level++;
+		energy = START_ENERGY;
+		player_moved = false;
+		sentinalSeenPlayer = false;
+
 		entities = new THREE.Group();
 		scene.add(entities);
 
@@ -128,15 +135,15 @@ highlight - menu change colour when selected
 			createCube(obj_loader, function(cube) {
 				var x = getRandomInt(2, SIZE-3)+.5;
 				var z = getRandomInt(2, SIZE-3)+.5;
-				if (isMapFlat(x, z)) {
-					if (isMapEmpty(x, z)) {
+				if (isMapFlat(x, z) && isMapEmpty(x, z)) {
 						var height = getHeightAtMapPoint(x, z)
 						cube.position.x = x;
 						cube.position.y = height;//+.5;
 						cube.position.z = z;
 
 						entities.add(cube);
-					}
+				} else {
+					i--; // todo - this is not quite right
 				}
 				//console.log("Cube added");
 			});
@@ -147,15 +154,15 @@ highlight - menu change colour when selected
 			createTree(obj_loader, function(tree) {
 				var x = getRandomInt(2, SIZE-3)+.5;
 				var z = getRandomInt(2, SIZE-3)+.5;
-				if (isMapFlat(x, z)) {
-					if (isMapEmpty(x, z)) {
+				if (isMapFlat(x, z) && isMapEmpty(x, z)) {
 						var height = getHeightAtMapPoint(x, z)
 						tree.position.x = x;
 						tree.position.y = height;
 						tree.position.z = z;
 
 						entities.add(tree);
-					}
+				} else {
+					i--;
 				}
 				//console.log("Tree added");
 			});
@@ -218,6 +225,8 @@ highlight - menu change colour when selected
 				if (menu_absorb.components.object == sentinel) {
 					sentinel = undefined;
 					entities.remove(map);
+					startLevel();
+					directionalLight.color.setHex(0x00ffff);
 					// todo - player has completed the level
 				}
 				incEnergy(1);
@@ -450,13 +459,15 @@ highlight - menu change colour when selected
 				
 				var intersects = raycaster.intersectObjects(entities.children, true);
 				if (intersects.length == 0) {
-					seenBySentinel(delta);
+					seenBySentinel();
 				} else if (intersects.length > 0) {
 					var toPlayer = vecToPlayer.length();
 					if (intersects[0].distance > toPlayer) {
-						seenBySentinel(delta);
+						seenBySentinel();
 					}
 				}
+			} else {
+				sentinalSeenPlayer = false;
 			}
 		}
 
@@ -473,9 +484,12 @@ highlight - menu change colour when selected
 	}
 
 
-	function seenBySentinel(delta) {
+	function seenBySentinel() {
 		directionalLight.color.setHex(0xff0000);
-		incEnergy(-delta);
+		if (sentinalSeenPlayer == false) {
+			sentinalSeenPlayer = true;
+			incEnergy(-1);
+		}
 		//console.log("Energy: " + energy);
 	}
 
@@ -540,6 +554,8 @@ highlight - menu change colour when selected
 		energy += v;
 		if (energy < 0) {
 			energy = 0;
+			startLevel();
+			directionalLight.color.setHex(0x222222);
 		}
 	}
 	

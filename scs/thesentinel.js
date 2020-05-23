@@ -14,7 +14,7 @@ export function generateMapData(SIZE) {
 		}
 	}
 	
-	for (var i=0 ; i<50 ; i++) {
+	for (var i=0 ; i<SIZE ; i++) {
 			var x = getRandomInt(0, SIZE-1);
 			var z = getRandomInt(0, SIZE-1);
 			var rad  = getRandomInt(2, SIZE/3);
@@ -26,9 +26,9 @@ export function generateMapData(SIZE) {
 
 
 function raiseMap(map, SIZE, sx, sz, rad) {
-	for (var z=sz ; z<sz+rad ; z++) {
+	for (var z=sz-rad ; z<sz+rad ; z++) {
 		if (z>=0 && z < SIZE) {
-			for (var x=sx ; x<sx+rad ; x++) {
+			for (var x=sx-rad ; x<sx+rad ; x++) {
 				if (x>=0 && x < SIZE) {
 					map[x][z]++;
 				}
