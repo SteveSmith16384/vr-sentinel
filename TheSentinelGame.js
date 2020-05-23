@@ -41,6 +41,7 @@ highlight - menu change colour when selected
 	var energy;
 	var energy_text;
 	var player_moved;
+	var level_started;
 	var level = 0;
 	var sentinalSeenPlayer;
 	
@@ -118,7 +119,8 @@ highlight - menu change colour when selected
 		energy = START_ENERGY;
 		player_moved = false;
 		sentinalSeenPlayer = false;
-
+		level_started = false;
+		
 		entities = new THREE.Group();
 		scene.add(entities);
 
@@ -131,7 +133,7 @@ highlight - menu change colour when selected
 		entities.add(mapent);
 
 		// Add cubes to absorb
-		for (var i=0 ; i<20 ; i++) {
+		for (var i=0 ; i<25 ; i++) {
 			createCube(obj_loader, function(cube) {
 				var x = getRandomInt(2, SIZE-3)+.5;
 				var z = getRandomInt(2, SIZE-3)+.5;
@@ -150,7 +152,7 @@ highlight - menu change colour when selected
 		}
 
 		// Add trees to absorb
-		for (var i=0 ; i<20 ; i++) {
+		for (var i=0 ; i<25 ; i++) {
 			createTree(obj_loader, function(tree) {
 				var x = getRandomInt(2, SIZE-3)+.5;
 				var z = getRandomInt(2, SIZE-3)+.5;
@@ -176,18 +178,10 @@ highlight - menu change colour when selected
 			setHighestPoint(obj, map, SIZE);
 		});
 
-		// Set player start position
-		var x = getRandomInt(2, SIZE-3);
-		var z = getRandomInt(2, SIZE-3);
-		while (isMapEmpty(x, z) == false) {
-			x = getRandomInt(SIZE/2, SIZE-1);
-			z = getRandomInt(SIZE/2, SIZE-1);
-		}
-		var height = getHeightAtMapPoint(x, z)
-		dolly.position.x = x + .5;
-		dolly.position.y = height;
-		dolly.position.z = z + .5;
-		
+		dolly.position.x = 0;//SIZE/2;
+		dolly.position.y = 40;
+		dolly.position.z = SIZE/2;
+
 		//console.log("Finished");
 	}
 	
@@ -215,6 +209,22 @@ highlight - menu change colour when selected
 
 
 	export function onSelectStart() {
+		if (level_started == false) {
+			level_started = true;
+			
+			// Set player start position
+			var x = getRandomInt(2, SIZE-3);
+			var z = getRandomInt(2, SIZE-3);
+			while (isMapEmpty(x, z) == false) {
+				x = getRandomInt(SIZE/2, SIZE-1);
+				z = getRandomInt(SIZE/2, SIZE-1);
+			}
+			var height = getHeightAtMapPoint(x, z)
+			dolly.position.x = x + .5;
+			dolly.position.y = height;
+			dolly.position.z = z + .5;
+		}
+
 		if (rawPointedAtObject != undefined) {
 			selectedObject = getObject(rawPointedAtObject);
 			var s = selectedObject;
