@@ -39,7 +39,7 @@ export function createText(text) {
 	material1.transparent = true;
 
 	var mesh = new THREE.Mesh(
-		new THREE.PlaneGeometry(2, .5),
+		new THREE.PlaneGeometry(3, .5),
 		material1
 	);
 	return mesh;

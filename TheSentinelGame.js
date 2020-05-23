@@ -75,7 +75,7 @@ highlight - menu change colour when selected
 		scene.background = new THREE.Color( 0x666666 );
 
 		// Create menu items
-		menu_teleport = createText("TELEPORT HERE");
+		menu_teleport = createText("TELEPORT");
 		menu_teleport.components = {};
 		menu_teleport.components.highlight = 1;
 		menu_teleport.components.position = new THREE.Vector3();
@@ -86,13 +86,13 @@ highlight - menu change colour when selected
 		menu_absorb.components.highlight = 1;
 		menuitems.push(menu_absorb);
 
-		menu_build_cube = createText("CREATE CUBE");
+		menu_build_cube = createText("CUBE");
 		menu_build_cube.components = {};
 		menu_build_cube.components.highlight = 1;
 		menu_build_cube.components.position = new THREE.Vector3();
 		menuitems.push(menu_build_cube);
 
-		menu_build_tree = createText("CREATE TREE");
+		menu_build_tree = createText("TREE");
 		menu_build_tree.components = {};
 		menu_build_tree.components.highlight = 1;
 		menu_build_tree.components.position = new THREE.Vector3();
@@ -255,19 +255,21 @@ highlight - menu change colour when selected
 
 				removeMenu();
 			} else {
+				// Clicked on a world object
 				var height = getHeightAtMapPoint(pointedAtPoint.x, pointedAtPoint.z);
 
 				removeMenu();
-				// Clicked on a world object
 				selectedObject = pointedAtObject;
 				if (s.components) {
 					if (s.components.absorb != undefined) {
-						menu_absorb.components.object = selectedObject;
-						menu_absorb.position.x = pointedAtPoint.x;
-						menu_absorb.position.y = height + .3;
-						menu_absorb.position.z = pointedAtPoint.z;
-						menu_absorb.rotation.y = Math.atan2( ( dolly.position.x - menu_absorb.position.x ), ( dolly.position.z - menu_absorb.position.z ) );
-						entities.add(menu_absorb);						
+						if (s != sentinel || height-1 <= dolly.position.y) { // Can only absorbe Sentinel if we're higher
+							menu_absorb.components.object = selectedObject;
+							menu_absorb.position.x = pointedAtPoint.x;
+							menu_absorb.position.y = height + .3;
+							menu_absorb.position.z = pointedAtPoint.z;
+							menu_absorb.rotation.y = Math.atan2( ( dolly.position.x - menu_absorb.position.x ), ( dolly.position.z - menu_absorb.position.z ) );
+							entities.add(menu_absorb);						
+						}
 					}
 					if (s.components.land != undefined && pointedAtPoint != undefined) {
 						if (DEBUG || energy > 0) {
@@ -305,11 +307,15 @@ highlight - menu change colour when selected
 										canBuild = true;
 										menu_build_cube.components.position.x = Math.floor(pointedAtPoint.x) + .5;
 										menu_build_cube.components.position.z = Math.floor(pointedAtPoint.z) + .5;
+										menu_build_tree.components.position.x = Math.floor(pointedAtPoint.x) + .5;
+										menu_build_tree.components.position.z = Math.floor(pointedAtPoint.z) + .5;
 									}
 								} else {
 									canBuild = true;
 									menu_build_cube.components.position.x = Math.floor(s.position.x) + .5;
 									menu_build_cube.components.position.z = Math.floor(s.position.z) + .5;
+									menu_build_tree.components.position.x = Math.floor(s.position.x) + .5;
+									menu_build_tree.components.position.z = Math.floor(s.position.z) + .5;
 								}
 								if (canBuild) {
 									menu_build_cube.position.x = pointedAtPoint.x;
@@ -317,10 +323,6 @@ highlight - menu change colour when selected
 									menu_build_cube.position.z = pointedAtPoint.z;
 									menu_build_cube.rotation.y = Math.atan2( ( dolly.position.x - menu_build_cube.position.x ), ( dolly.position.z - menu_build_cube.position.z ) );
 									entities.add(menu_build_cube);
-
-									menu_build_tree.components.position.x = Math.floor(pointedAtPoint.x) + .5;
-									menu_build_tree.components.position.y = pointedAtPoint.y;
-									menu_build_tree.components.position.z = Math.floor(pointedAtPoint.z) + .5;
 									
 									menu_build_tree.position.x = pointedAtPoint.x;
 									menu_build_tree.position.y = height + 1.2;
