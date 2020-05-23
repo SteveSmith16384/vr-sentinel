@@ -62,9 +62,6 @@ highlight - menu change colour when selected
 		tex_loader = new THREE.TextureLoader();
 		obj_loader = new OBJLoader(manager);
 		
-		entities = new THREE.Group();
-		scene.add(entities);
-		
 		scene.add( new THREE.HemisphereLight( 0x303030, 0x101010 ) );
 
 		directionalLight = new THREE.DirectionalLight( 0x00ff00, 1, 100 );
@@ -79,7 +76,6 @@ highlight - menu change colour when selected
 		menu_teleport = createText("TELEPORT");
 		menu_teleport.components = {};
 		menu_teleport.components.highlight = 1;
-		//menu_teleport.components.position = new THREE.Vector3();
 		menuitems.push(menu_teleport);
 		
 		menu_absorb = createText("ABSORB");
@@ -90,13 +86,11 @@ highlight - menu change colour when selected
 		menu_build_cube = createText("CUBE");
 		menu_build_cube.components = {};
 		menu_build_cube.components.highlight = 1;
-		//menu_build_cube.components.position = new THREE.Vector3();
 		menuitems.push(menu_build_cube);
 
 		menu_build_tree = createText("TREE");
 		menu_build_tree.components = {};
 		menu_build_tree.components.highlight = 1;
-		//menu_build_tree.components.position = new THREE.Vector3();
 		menuitems.push(menu_build_tree);
 
 		energy_text = createText("ENERGY: " + energy);
@@ -108,6 +102,18 @@ highlight - menu change colour when selected
 			highlight.name = "highlight";
 			scene.add(cube);
 		});
+		
+		startLevel();
+	}
+	
+	
+	function startLevel() {
+		if (entities != undefined) {
+			scene.remove(entities);
+		}
+		
+		entities = new THREE.Group();
+		scene.add(entities);
 
 		map = generateMapData(SIZE);
 
@@ -132,6 +138,7 @@ highlight - menu change colour when selected
 						entities.add(cube);
 					}
 				}
+				//console.log("Cube added");
 			});
 		}
 
@@ -150,6 +157,7 @@ highlight - menu change colour when selected
 						entities.add(tree);
 					}
 				}
+				//console.log("Tree added");
 			});
 		}
 
@@ -172,6 +180,8 @@ highlight - menu change colour when selected
 		dolly.position.x = x + .5;
 		dolly.position.y = height;
 		dolly.position.z = z + .5;
+		
+		//console.log("Finished");
 	}
 	
 
@@ -179,7 +189,7 @@ highlight - menu change colour when selected
 		var hx=0, hz=0, highest=0;
 		for (var z=0 ; z<SIZE/2-1 ; z++) {
 			for (var x=0 ; x<SIZE/2-1 ; x++) {
-				var h = map[x][z];//getHeightAtMapPoint(x, z);
+				var h = map[x][z];
 				if (h > highest) {
 					if (isMapFlat(x, z)) {
 						highest = h;
@@ -206,6 +216,7 @@ highlight - menu change colour when selected
 			if (s == menu_absorb) {
 				entities.remove(menu_absorb.components.object);
 				if (menu_absorb.components.object == sentinel) {
+					sentinel = undefined;
 					entities.remove(map);
 					// todo - player has completed the level
 				}
@@ -253,10 +264,9 @@ highlight - menu change colour when selected
 				var height = getHeightAtMapPoint(refinedSelectedPoint.x, refinedSelectedPoint.z);
 
 				removeMenu();
-				//selectedObject = selectedObject;
 				if (s.components) {
 					if (s.components.absorb != undefined) {
-						if (s != sentinel || height-1-SENTINEL_HEIGHT <= dolly.position.y) { // Can only absorbe Sentinel if we're higher scs
+						if (s != sentinel || height-1-SENTINEL_HEIGHT <= dolly.position.y) { // Can only absorbe Sentinel if we're higher
 							menu_absorb.components.object = selectedObject;
 							menu_absorb.position.x = refinedSelectedPoint.x;
 							menu_absorb.position.y = height + .3;
@@ -430,7 +440,7 @@ highlight - menu change colour when selected
 				raycaster.ray.origin.y = sentinel.position.y + (SENTINEL_HEIGHT);
 				raycaster.ray.origin.z = sentinel.position.z;
 				
-				var vecToPlayer = new THREE.Vector3(dolly.position.x-sentinel.position.x, dolly.position.y-sentinel.position.y, dolly.position.z-sentinel.position.z);
+				var vecToPlayer = new THREE.Vector3(dolly.position.x-sentinel.position.x, dolly.position.y-sentinel.position.y-0.2, dolly.position.z-sentinel.position.z);
 				var vecNrm = new THREE.Vector3(vecToPlayer.x, vecToPlayer.y, vecToPlayer.z);
 				vecNrm.normalize();
 				
