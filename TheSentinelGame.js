@@ -21,7 +21,6 @@ highlight - menu change colour when selected
 	const DEBUG = true;
 	const sentinelView = Math.PI / 8;
 	const SENTINEL_HEIGHT = 2;
-	const PLAYER_HEIGHT = 0;//.1;
 	const START_ENERGY = 3;
 	
 	// Other vars
@@ -32,10 +31,10 @@ highlight - menu change colour when selected
 	var entities = undefined; // Anything that can be selected
 	var mapent;
 	
+	var rawPointedAtObject;
+	var rawPointedAtPoint; // Where the player is currently pointing
 	var selectedObject; // The object the player has clicked on
-	var pointedAtObject; // The object the player is pointing at
-	var pointedAtPoint; // Where the player is currently pointing
-	var refinedSelectedPoint;
+	var refinedSelectedPoint; // the int coords of selected point
 	
 	var highlight = undefined;
 	var sentinel = undefined;
@@ -52,6 +51,8 @@ highlight - menu change colour when selected
 	var menu_build_cube;
 	var menu_build_tree;
 	var menu_teleport;
+	
+	var player_moved = false;
 
 	export function initGame(_scene, _dolly) {
 		scene = _scene;
@@ -78,7 +79,7 @@ highlight - menu change colour when selected
 		menu_teleport = createText("TELEPORT");
 		menu_teleport.components = {};
 		menu_teleport.components.highlight = 1;
-		menu_teleport.components.position = new THREE.Vector3();
+		//menu_teleport.components.position = new THREE.Vector3();
 		menuitems.push(menu_teleport);
 		
 		menu_absorb = createText("ABSORB");
@@ -89,13 +90,13 @@ highlight - menu change colour when selected
 		menu_build_cube = createText("CUBE");
 		menu_build_cube.components = {};
 		menu_build_cube.components.highlight = 1;
-		menu_build_cube.components.position = new THREE.Vector3();
+		//menu_build_cube.components.position = new THREE.Vector3();
 		menuitems.push(menu_build_cube);
 
 		menu_build_tree = createText("TREE");
 		menu_build_tree.components = {};
 		menu_build_tree.components.highlight = 1;
-		menu_build_tree.components.position = new THREE.Vector3();
+		//menu_build_tree.components.position = new THREE.Vector3();
 		menuitems.push(menu_build_tree);
 
 		energy_text = createText("ENERGY: " + energy);
@@ -123,13 +124,13 @@ highlight - menu change colour when selected
 				var z = getRandomInt(2, SIZE-3)+.5;
 				if (isMapFlat(x, z)) {
 					if (isMapEmpty(x, z)) {
-					var height = getHeightAtMapPoint(x, z)
-					cube.position.x = x;
-					cube.position.y = height;//+.5;
-					cube.position.z = z;
+						var height = getHeightAtMapPoint(x, z)
+						cube.position.x = x;
+						cube.position.y = height;//+.5;
+						cube.position.z = z;
 
-					entities.add(cube);
-				}
+						entities.add(cube);
+					}
 				}
 			});
 		}
@@ -141,12 +142,12 @@ highlight - menu change colour when selected
 				var z = getRandomInt(2, SIZE-3)+.5;
 				if (isMapFlat(x, z)) {
 					if (isMapEmpty(x, z)) {
-					var height = getHeightAtMapPoint(x, z)
-					tree.position.x = x;
-					tree.position.y = height;
-					tree.position.z = z;
+						var height = getHeightAtMapPoint(x, z)
+						tree.position.x = x;
+						tree.position.y = height;
+						tree.position.z = z;
 
-					entities.add(tree);
+						entities.add(tree);
 					}
 				}
 			});
@@ -161,12 +162,16 @@ highlight - menu change colour when selected
 		});
 
 		// Set player start position
-		var x = getRandomInt(2, SIZE-3)+.5;
-		var z = getRandomInt(2, SIZE-3)+.5;
+		var x = getRandomInt(2, SIZE-3);
+		var z = getRandomInt(2, SIZE-3);
+		while (isMapEmpty(x, z) == false) {
+			x = getRandomInt(SIZE/2, SIZE-1);
+			z = getRandomInt(SIZE/2, SIZE-1);
+		}
 		var height = getHeightAtMapPoint(x, z)
-		dolly.position.x = x;
+		dolly.position.x = x + .5;
 		dolly.position.y = height;
-		dolly.position.z = z;
+		dolly.position.z = z + .5;
 	}
 	
 
@@ -174,42 +179,29 @@ highlight - menu change colour when selected
 		var hx=0, hz=0, highest=0;
 		for (var z=0 ; z<SIZE/2-1 ; z++) {
 			for (var x=0 ; x<SIZE/2-1 ; x++) {
-				if (isMapFlat(x, z)) {
-					if (isMapEmpty(x, z)) {
-						var h = getHeightAtMapPoint(x, z);
-						if (h > highest) {
-							highest = h;
-							hx = x;
-							hz = z;
-						}
+				var h = map[x][z];//getHeightAtMapPoint(x, z);
+				if (h > highest) {
+					if (isMapFlat(x, z)) {
+						highest = h;
+						hx = x;
+						hz = z;
 					}
 				}
 			}
 		}
-		sentinel.position.x = hx;
-		sentinel.position.y = highest;
-		sentinel.position.z = hz;
 		
+		removeEntitiesAt(hx +.5, hz +.5);
+		sentinel.position.x = hx +.5;
+		sentinel.position.y = highest;
+		sentinel.position.z = hz +.5;		
 	}
 
 
-	function currentPointer(object, point) {
-		pointedAtObject = object;
-		if (object != undefined) {
-			pointedAtPoint = point;
-			//object.material.color.setHex(0xff0000);
-			if (highlight != undefined) {
-				highlight.position.x = point.x;
-				highlight.position.y = point.y + .1;
-				highlight.position.z = point.z;
-			}
-		}
-	}
-	
-	
 	export function onSelectStart() {
-		if (pointedAtObject != undefined) {
-			var s = pointedAtObject;
+		if (rawPointedAtObject != undefined) {
+			selectedObject = getObject(rawPointedAtObject);
+			var s = selectedObject;
+			
 			// Was it a menu item?
 			if (s == menu_absorb) {
 				entities.remove(menu_absorb.components.object);
@@ -221,8 +213,9 @@ highlight - menu change colour when selected
 				removeMenu();
 			} else if (s == menu_teleport) {
 				//console.log("Clicked on teleport");
-				var x = menu_teleport.components.position.x;
-				var z = menu_teleport.components.position.z;
+				player_moved = true;
+				var x = refinedSelectedPoint.x;
+				var z = refinedSelectedPoint.z;
 				dolly.position.x = x;
 				dolly.position.z = z;
 				dolly.position.y = getHeightAtMapPoint(x, z);
@@ -230,8 +223,8 @@ highlight - menu change colour when selected
 				removeMenu();
 			} else if (s == menu_build_cube) {
 				createCube(obj_loader, function(cube) {
-					var x = Math.floor(menu_build_cube.components.position.x) + .5;
-					var z = Math.floor(menu_build_cube.components.position.z) + .5;
+					var x = refinedSelectedPoint.x;//Math.floor(menu_build_cube.components.position.x) + .5;
+					var z = refinedSelectedPoint.z;//Math.floor(menu_build_cube.components.position.z) + .5;
 					var height = getHeightAtMapPoint(x, z)
 					cube.position.x = x;
 					cube.position.y = height;
@@ -243,8 +236,8 @@ highlight - menu change colour when selected
 				removeMenu();
 			} else if (s == menu_build_tree) {
 				createTree(obj_loader, function(tree) {
-					var x = Math.floor(menu_build_tree.components.position.x) + .5;
-					var z = Math.floor(menu_build_tree.components.position.z) + .5;
+					var x = refinedSelectedPoint.x;//Math.floor(menu_build_tree.components.position.x) + .5;
+					var z = refinedSelectedPoint.z;//Math.floor(menu_build_tree.components.position.z) + .5;
 					var height = getHeightAtMapPoint(x, z)
 					tree.position.x = x;
 					tree.position.y = height;
@@ -256,77 +249,78 @@ highlight - menu change colour when selected
 				removeMenu();
 			} else {
 				// Clicked on a world object
-				var height = getHeightAtMapPoint(pointedAtPoint.x, pointedAtPoint.z);
+				refinedSelectedPoint = getRefinedSelectedPoint(rawPointedAtPoint);
+				var height = getHeightAtMapPoint(refinedSelectedPoint.x, refinedSelectedPoint.z);
 
 				removeMenu();
-				selectedObject = pointedAtObject;
+				//selectedObject = selectedObject;
 				if (s.components) {
 					if (s.components.absorb != undefined) {
-						if (s != sentinel || height-1 <= dolly.position.y) { // Can only absorbe Sentinel if we're higher
+						if (s != sentinel || height-1-SENTINEL_HEIGHT <= dolly.position.y) { // Can only absorbe Sentinel if we're higher scs
 							menu_absorb.components.object = selectedObject;
-							menu_absorb.position.x = pointedAtPoint.x;
+							menu_absorb.position.x = refinedSelectedPoint.x;
 							menu_absorb.position.y = height + .3;
-							menu_absorb.position.z = pointedAtPoint.z;
+							menu_absorb.position.z = refinedSelectedPoint.z;
 							menu_absorb.rotation.y = Math.atan2( ( dolly.position.x - menu_absorb.position.x ), ( dolly.position.z - menu_absorb.position.z ) );
 							entities.add(menu_absorb);						
 						}
 					}
-					if (s.components.land != undefined && pointedAtPoint != undefined) {
+					if (s.components.land != undefined && refinedSelectedPoint != undefined) {
 						if (DEBUG || energy > 0) {
 							// Check we can see the top
 							if (s.components.cube != undefined || height-1 <= dolly.position.y) {
 								var canLand = false;
 								if (s == mapent) {
-									if (isMapFlat(pointedAtPoint.x, pointedAtPoint.z)) {
+									if (isMapFlat(refinedSelectedPoint.x, refinedSelectedPoint.z)) {
 										canLand = true;
-										menu_teleport.components.position.x = Math.floor(pointedAtPoint.x) + .5;
-										menu_teleport.components.position.z = Math.floor(pointedAtPoint.z) + .5;
+										//menu_teleport.components.position.x = Math.floor(rawPointedAtPoint.x) + .5;
+										//menu_teleport.components.position.z = Math.floor(rawPointedAtPoint.z) + .5;
 									}
 								} else {
 									canLand = true;
-									menu_teleport.components.position.x = Math.floor(s.position.x) + .5;
-									menu_teleport.components.position.z = Math.floor(s.position.z) + .5;
+									//menu_teleport.components.position.x = Math.floor(s.position.x) + .5;
+									//menu_teleport.components.position.z = Math.floor(s.position.z) + .5;
 								}
 								if (canLand) {
-									menu_teleport.position.x = pointedAtPoint.x;
+									menu_teleport.position.x = refinedSelectedPoint.x;
 									menu_teleport.position.y = height + .6;
-									menu_teleport.position.z = pointedAtPoint.z;
+									menu_teleport.position.z = refinedSelectedPoint.z;
 									menu_teleport.rotation.y = Math.atan2( ( dolly.position.x - menu_teleport.position.x ), ( dolly.position.z - menu_teleport.position.z ) );
 									entities.add(menu_teleport);
 								}
 							}
 						}
 					}
-					if (s.components.build != undefined && pointedAtPoint != undefined) {
+					if (s.components.build != undefined && refinedSelectedPoint != undefined) {
 						if (DEBUG || energy > 0) {
 							// Check we can see the top
 							if (s.components.cube != undefined || height-1 <= dolly.position.y) {
 								var canBuild = false;
 								if (s == mapent) {
-									if (isMapFlat(pointedAtPoint.x, pointedAtPoint.z)) {
+									if (isMapFlat(refinedSelectedPoint.x, refinedSelectedPoint.z)) {
 										canBuild = true;
-										menu_build_cube.components.position.x = Math.floor(pointedAtPoint.x) + .5;
-										menu_build_cube.components.position.z = Math.floor(pointedAtPoint.z) + .5;
-										menu_build_tree.components.position.x = Math.floor(pointedAtPoint.x) + .5;
-										menu_build_tree.components.position.z = Math.floor(pointedAtPoint.z) + .5;
+										//menu_build_cube.components.position.x = Math.floor(rawPointedAtPoint.x) + .5;
+										//menu_build_cube.components.position.z = Math.floor(rawPointedAtPoint.z) + .5;
+										//menu_build_tree.components.position.x = Math.floor(rawPointedAtPoint.x) + .5;
+										//menu_build_tree.components.position.z = Math.floor(rawPointedAtPoint.z) + .5;
 									}
 								} else {
 									canBuild = true;
-									menu_build_cube.components.position.x = Math.floor(s.position.x) + .5;
-									menu_build_cube.components.position.z = Math.floor(s.position.z) + .5;
-									menu_build_tree.components.position.x = Math.floor(s.position.x) + .5;
-									menu_build_tree.components.position.z = Math.floor(s.position.z) + .5;
+									//menu_build_cube.components.position.x = Math.floor(s.position.x) + .5;
+									//menu_build_cube.components.position.z = Math.floor(s.position.z) + .5;
+									//menu_build_tree.components.position.x = Math.floor(s.position.x) + .5;
+									//menu_build_tree.components.position.z = Math.floor(s.position.z) + .5;
 								}
 								if (canBuild) {
-									menu_build_cube.position.x = pointedAtPoint.x;
+									menu_build_cube.position.x = refinedSelectedPoint.x;
 									menu_build_cube.position.y = height + .9;
-									menu_build_cube.position.z = pointedAtPoint.z;
+									menu_build_cube.position.z = refinedSelectedPoint.z;
 									menu_build_cube.rotation.y = Math.atan2( ( dolly.position.x - menu_build_cube.position.x ), ( dolly.position.z - menu_build_cube.position.z ) );
 									entities.add(menu_build_cube);
 									
-									menu_build_tree.position.x = pointedAtPoint.x;
+									menu_build_tree.position.x = refinedSelectedPoint.x;
 									menu_build_tree.position.y = height + 1.2;
-									menu_build_tree.position.z = pointedAtPoint.z;
+									menu_build_tree.position.z = refinedSelectedPoint.z;
 									menu_build_tree.rotation.y = Math.atan2( ( dolly.position.x - menu_build_cube.position.x ), ( dolly.position.z - menu_build_cube.position.z ) );
 									entities.add(menu_build_tree);
 								}
@@ -336,9 +330,9 @@ highlight - menu change colour when selected
 					
 					// Position stats
 					setText(energy_text, "ENERGY: " + Math.floor(energy));
-					energy_text.position.x = pointedAtPoint.x;
+					energy_text.position.x = refinedSelectedPoint.x;
 					energy_text.position.y = height + 1.5;
-					energy_text.position.z = pointedAtPoint.z;
+					energy_text.position.z = refinedSelectedPoint.z;
 					energy_text.rotation.y = Math.atan2( ( dolly.position.x - energy_text.position.x ), ( dolly.position.z - energy_text.position.z ) );
 					entities.add(energy_text);
 
@@ -369,33 +363,38 @@ highlight - menu change colour when selected
 		var intersects = raycaster.intersectObjects(entities.children, true);
 
 		if (intersects.length > 0) {
-			scene.add(highlight);
-			var obj = intersects[0].object;
-			while (obj.components == undefined) {
-				console.log("Selected " + obj.name);
-				if (obj.parent != undefined) {
-					obj = obj.parent;
-				} else {
-					break;
+			if (highlight != undefined) {
+				scene.add(highlight);
+			}
+			rawPointedAtObject = intersects[0].object;
+			
+			if (rawPointedAtObject != undefined) {
+				rawPointedAtPoint = intersects[0].point;
+				//object.material.color.setHex(0xff0000);
+				if (highlight != undefined) {
+					// Move pointer to where we're pointing
+					highlight.position.x = intersects[0].point.x;
+					highlight.position.y = intersects[0].point.y + .1;
+					highlight.position.z = intersects[0].point.z;
 				}
 			}
-			
-			currentPointer(obj, intersects[0].point);
-			if (obj.components != undefined) {
-				if (obj.components.highlight != undefined) {
+			if (rawPointedAtObject.components != undefined) {
+				// Highlight menu options
+				if (rawPointedAtObject.components.highlight != undefined) {
 					for (var i = 0; i < menuitems.length; i++ ) {
 						menuitems[i].material.color.setHex(0xffffff);
 					}
-					obj.material.color.setHex(0x00ffff);
+					rawPointedAtObject.material.color.setHex(0x00ffff);
 				}
 			}
 		} else {
-			//intersectedObject = undefined;
-			scene.remove(highlight);
+			if (highlight != undefined) {
+				scene.remove(highlight);
+			}
 		}
 		
 		// Process entinel
-		if (sentinel != undefined) {
+		if (sentinel != undefined && player_moved) {
 			// Rotate sentinel
 			sentinel.rotation.y += .6 * delta;
 			while (sentinel.rotation.y > Math.PI) {
@@ -404,10 +403,8 @@ highlight - menu change colour when selected
 			while (sentinel.rotation.y < -Math.PI) {
 				sentinel.rotation.y += Math.PI*2;
 			}
-			//console.log("sentinel.rotation.y=" + sentinel.rotation.y);
 			
 			var angleStoP = getAngleFromSentinelToPlayer();
-			//console.log("angleStoP1=" + angleStoP);
 			while (angleStoP > Math.PI) {
 				angleStoP -= Math.PI*2;
 			}
@@ -453,6 +450,7 @@ highlight - menu change colour when selected
 			}
 		}
 
+/*
 		for (var s of entities.children) {
 			if (s.components) {
 				// Point to face camera
@@ -461,7 +459,7 @@ highlight - menu change colour when selected
 				}
 			}
 		}
-		
+*/		
 	}
 
 
@@ -568,5 +566,35 @@ highlight - menu change colour when selected
 			}
 		}
 		return point;
+	}
+	
+	
+	function removeEntitiesAt(x, z) {
+		raycaster.ray.origin.x = x;
+		raycaster.ray.origin.y = 100;
+		raycaster.ray.origin.z = z;
+		raycaster.ray.direction.set( 0, -1, 0 );
+
+		var intersects = raycaster.intersectObjects(entities.children, true);
+		var obj = intersects[0].object;
+		while (obj != mapent) {
+			obj = getObject(obj);
+			entities.remove(obj);
+			intersects = raycaster.intersectObjects(entities.children, true);
+			obj = intersects[0].object;
+		}
+	}
+	
+	
+	function getObject(obj) {
+		while (obj.components == undefined) {
+			//console.log("Selected " + obj.name);
+			if (obj.parent != undefined) {
+				obj = obj.parent;
+			} else {
+				break;
+			}
+		}
+		return obj;
 	}
 	
