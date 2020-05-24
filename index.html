@@ -7,12 +7,9 @@
 	</head>
 	<body>
 
-		<div id="info">
-			The Sentinel - VR
-		</div>
+		<div id="info">The Sentinel - VR</div>
 
-		<script src="js/vr/HelioWebXRPolyfill.js"></script>
-
+		<script src="./js/vr/HelioWebXRPolyfill.js"></script>
 
 		<script type="module">
 
@@ -38,7 +35,6 @@
 				document.body.appendChild( container );
 
 				scene = new THREE.Scene();
-				//scene.background = new THREE.Color( 0x4444ff );
 
 				camera = new THREE.PerspectiveCamera( 50, window.innerWidth / window.innerHeight, 0.1, 100 );
 

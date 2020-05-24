@@ -24,10 +24,10 @@ export function createBillboard(loader, texture, w, h, callback) {
 	);
 }
 
-export function createText(text) {
+export function createText(text, size = 40) {
 	var canvas1 = document.createElement('canvas');
 	var context1 = canvas1.getContext('2d');
-	context1.font = "Bold 40px Arial";
+	context1.font = "Bold " + size + "px Arial";
 	context1.fillStyle = "rgba(255,255,255,1)";
 	context1.fillText(text, 0, 60);
 
@@ -39,17 +39,17 @@ export function createText(text) {
 	material1.transparent = true;
 
 	var mesh = new THREE.Mesh(
-		new THREE.PlaneGeometry(3, .5),
+		new THREE.PlaneGeometry(size/14, .5),
 		material1
 	);
 	return mesh;
 }
 
 
-export function setText(mesh, text) {
+export function setText(mesh, text, size = 40) {
 	var canvas1 = document.createElement('canvas');
 	var context1 = canvas1.getContext('2d');
-	context1.font = "Bold 40px Arial";
+	context1.font = "Bold " + size + "px Arial";
 	context1.fillStyle = "rgba(255,255,255,1)";
 	context1.fillText(text, 0, 60);
 

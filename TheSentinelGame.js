@@ -7,7 +7,6 @@ import { OBJLoader } from './jsm/loaders/OBJLoader.js';
 
 /*
 ECS Components:-
-face - Always face the camera
 text - Text to show if player pointing at it.
 absorb - energy gained fom absorption
 land - can be landed on
@@ -17,7 +16,7 @@ highlight - menu change colour when selected
 */
 
 	// Settings
-	const DEBUG = true;
+	const DEBUG = false;
 	const sentinelView = Math.PI / 8;
 	const SENTINEL_HEIGHT = 2;
 	const START_ENERGY = 10;
@@ -58,6 +57,7 @@ highlight - menu change colour when selected
 	var menu_build_tree;
 	var menu_teleport;
 	
+	var level_text;
 
 	export function initGame(_scene, _dolly, camera) {
 		scene = _scene;
@@ -81,27 +81,27 @@ highlight - menu change colour when selected
 		scene.background = new THREE.Color( 0x000000 );
 
 		// Create menu items
-		menu_teleport = createText("TELEPORT");
+		menu_teleport = createText("TELEPORT", 40);
 		menu_teleport.components = {};
 		menu_teleport.components.highlight = 1;
 		menuitems.push(menu_teleport);
 		
-		menu_absorb = createText("ABSORB");
+		menu_absorb = createText("ABSORB", 40);
 		menu_absorb.components = {};
 		menu_absorb.components.highlight = 1;
 		menuitems.push(menu_absorb);
 
-		menu_build_cube = createText("CUBE");
+		menu_build_cube = createText("CUBE", 40);
 		menu_build_cube.components = {};
 		menu_build_cube.components.highlight = 1;
 		menuitems.push(menu_build_cube);
 
-		menu_build_tree = createText("TREE");
+		menu_build_tree = createText("TREE", 40);
 		menu_build_tree.components = {};
 		menu_build_tree.components.highlight = 1;
 		menuitems.push(menu_build_tree);
 
-		energy_text = createText("ENERGY: " + energy);
+		energy_text = createText("ENERGY: " + energy, 40);
 		menuitems.push(energy_text);
 
 		// Create pointer
@@ -199,12 +199,18 @@ highlight - menu change colour when selected
 		dolly.position.y = 30;
 		dolly.position.z = SIZE+10;//0;//SIZE/2;
 
+		level_text = createText("LEVEL " + level, 80);
+		level_text.position.x = SIZE/2;
+		level_text.position.y = dolly.position.y;
+		level_text.position.z = SIZE;
+		scene.add(level_text);
+		
 		//console.log("Finished");
 	}
 	
 	
 	function startAgain() {
-		level = 0;
+		//level = 0;
 		SIZE = 40;
 		
 		startLevel();
@@ -248,6 +254,7 @@ highlight - menu change colour when selected
 			dolly.position.y = height;
 			dolly.position.z = z + .5;
 			
+			scene.remove(level_text);
 			return;
 		}
 
@@ -389,7 +396,7 @@ highlight - menu change colour when selected
 					}
 					
 					// Position stats
-					setText(energy_text, "ENERGY: " + Math.floor(energy));
+					setText(energy_text, "ENERGY: " + Math.floor(energy), 40);
 					energy_text.position.x = refinedSelectedPoint.x;
 					energy_text.position.y = selectedHeight + 1.5;
 					energy_text.position.z = refinedSelectedPoint.z;
