@@ -183,7 +183,7 @@ highlight - menu change colour when selected
 
 		dolly.position.x = SIZE/2;
 		dolly.position.y = 30;
-		dolly.position.z = SIZE;//0;//SIZE/2;
+		dolly.position.z = SIZE+10;//0;//SIZE/2;
 
 		//console.log("Finished");
 	}
@@ -233,7 +233,11 @@ highlight - menu change colour when selected
 			dolly.position.x = x + .5;
 			dolly.position.y = height;
 			dolly.position.z = z + .5;
+			
+			return;
 		}
+
+		player_moved = true;
 
 		if (rawPointedAtObject != undefined) {
 			selectedObject = getObject(rawPointedAtObject);
@@ -243,17 +247,16 @@ highlight - menu change colour when selected
 			if (s == menu_absorb) {
 				entities.remove(menu_absorb.components.object);
 				if (menu_absorb.components.object == sentinel) {
+					// player has completed the level
 					sentinel = undefined;
 					entities.remove(map);
 					startLevel();
 					directionalLight.color.setHex(0x00ffff);
-					// todo - player has completed the level
 				}
 				incEnergy(menu_absorb.components.object.components.absorb);
 				removeMenu();
 			} else if (s == menu_teleport) {
 				//console.log("Clicked on teleport");
-				player_moved = true;
 				var x = refinedSelectedPoint.x;
 				var z = refinedSelectedPoint.z;
 				dolly.position.x = x;
@@ -314,13 +317,9 @@ highlight - menu change colour when selected
 								if (s == mapent) {
 									if (isMapFlat(refinedSelectedPoint.x, refinedSelectedPoint.z)) {
 										canLand = true;
-										//menu_teleport.components.position.x = Math.floor(rawPointedAtPoint.x) + .5;
-										//menu_teleport.components.position.z = Math.floor(rawPointedAtPoint.z) + .5;
 									}
 								} else {
 									canLand = true;
-									//menu_teleport.components.position.x = Math.floor(s.position.x) + .5;
-									//menu_teleport.components.position.z = Math.floor(s.position.z) + .5;
 								}
 								if (canLand) {
 									menu_teleport.position.x = refinedSelectedPoint.x;
@@ -340,17 +339,9 @@ highlight - menu change colour when selected
 								if (s == mapent) {
 									if (isMapFlat(refinedSelectedPoint.x, refinedSelectedPoint.z)) {
 										canBuild = true;
-										//menu_build_cube.components.position.x = Math.floor(rawPointedAtPoint.x) + .5;
-										//menu_build_cube.components.position.z = Math.floor(rawPointedAtPoint.z) + .5;
-										//menu_build_tree.components.position.x = Math.floor(rawPointedAtPoint.x) + .5;
-										//menu_build_tree.components.position.z = Math.floor(rawPointedAtPoint.z) + .5;
 									}
 								} else {
 									canBuild = true;
-									//menu_build_cube.components.position.x = Math.floor(s.position.x) + .5;
-									//menu_build_cube.components.position.z = Math.floor(s.position.z) + .5;
-									//menu_build_tree.components.position.x = Math.floor(s.position.x) + .5;
-									//menu_build_tree.components.position.z = Math.floor(s.position.z) + .5;
 								}
 								if (canBuild) {
 									menu_build_cube.position.x = refinedSelectedPoint.x;
