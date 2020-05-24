@@ -17,11 +17,10 @@ highlight - menu change colour when selected
 */
 
 	// Settings
-	const SIZE = 60;
 	const DEBUG = true;
 	const sentinelView = Math.PI / 8;
 	const SENTINEL_HEIGHT = 2;
-	const START_ENERGY = 3;
+	const START_ENERGY = 10;
 	
 	// Other vars
 	var scene, dolly;
@@ -44,6 +43,7 @@ highlight - menu change colour when selected
 	var level_started;
 	var level = 0;
 	var sentinalSeenPlayer;
+	var SIZE;
 	
 	var tempMatrix = new THREE.Matrix4();
 	var raycaster = new THREE.Raycaster();
@@ -67,13 +67,15 @@ highlight - menu change colour when selected
 		
 		scene.add( new THREE.HemisphereLight( 0x303030, 0x101010 ) );
 
-		directionalLight = new THREE.DirectionalLight( 0x00ff00, 1, 100 );
+		//directionalLight = new THREE.DirectionalLight( 0x00ff00, 1, 100 );
+		directionalLight = new THREE.DirectionalLight( 0xffffff, 1, 100 );
 		directionalLight.position.set( 0, 1, 0 );
 		directionalLight.target.position.set( 0, 0, 0 );
 		directionalLight.castShadow = true;
 		scene.add( directionalLight );
 
-		scene.background = new THREE.Color( 0x666666 );
+		//scene.background = new THREE.Color( 0x666666 );
+		scene.background = new THREE.Color( 0x000000 );
 
 		// Create menu items
 		menu_teleport = createText("TELEPORT");
@@ -106,7 +108,7 @@ highlight - menu change colour when selected
 			scene.add(cube);
 		});
 		
-		startLevel();
+		startAgain();
 	}
 	
 	
@@ -120,6 +122,7 @@ highlight - menu change colour when selected
 		player_moved = false;
 		sentinalSeenPlayer = false;
 		level_started = false;
+		SIZE += 10;
 		
 		entities = new THREE.Group();
 		scene.add(entities);
@@ -178,18 +181,25 @@ highlight - menu change colour when selected
 			setHighestPoint(obj, map, SIZE);
 		});
 
-		dolly.position.x = 0;//SIZE/2;
-		dolly.position.y = 40;
-		dolly.position.z = SIZE/2;
+		dolly.position.x = SIZE/2;
+		dolly.position.y = 30;
+		dolly.position.z = SIZE;//0;//SIZE/2;
 
 		//console.log("Finished");
 	}
 	
+	
+	function startAgain() {
+		level = 0;
+		SIZE = 40;
+		
+		startLevel();
+	}
 
 	function setHighestPoint() {
 		var hx=0, hz=0, highest=0;
-		for (var z=0 ; z<SIZE/2-1 ; z++) {
-			for (var x=0 ; x<SIZE/2-1 ; x++) {
+		for (var z=0 ; z<SIZE-1 ; z++) {
+			for (var x=0 ; x<SIZE-1 ; x++) {
 				var h = map[x][z];
 				if (h > highest) {
 					if (isMapFlat(x, z)) {
@@ -239,7 +249,7 @@ highlight - menu change colour when selected
 					directionalLight.color.setHex(0x00ffff);
 					// todo - player has completed the level
 				}
-				incEnergy(1);
+				incEnergy(menu_absorb.components.object.components.absorb);
 				removeMenu();
 			} else if (s == menu_teleport) {
 				//console.log("Clicked on teleport");
@@ -253,21 +263,21 @@ highlight - menu change colour when selected
 				removeMenu();
 			} else if (s == menu_build_cube) {
 				createCube(obj_loader, function(cube) {
-					var x = refinedSelectedPoint.x;//Math.floor(menu_build_cube.components.position.x) + .5;
-					var z = refinedSelectedPoint.z;//Math.floor(menu_build_cube.components.position.z) + .5;
+					var x = refinedSelectedPoint.x;
+					var z = refinedSelectedPoint.z;
 					var height = getHeightAtMapPoint(x, z)
 					cube.position.x = x;
 					cube.position.y = height;
 					cube.position.z = z;
 					entities.add(cube);
-					incEnergy(-1);
+					incEnergy(-2);
 				});
 
 				removeMenu();
 			} else if (s == menu_build_tree) {
 				createTree(obj_loader, function(tree) {
-					var x = refinedSelectedPoint.x;//Math.floor(menu_build_tree.components.position.x) + .5;
-					var z = refinedSelectedPoint.z;//Math.floor(menu_build_tree.components.position.z) + .5;
+					var x = refinedSelectedPoint.x;
+					var z = refinedSelectedPoint.z;
 					var height = getHeightAtMapPoint(x, z)
 					tree.position.x = x;
 					tree.position.y = height;
@@ -279,16 +289,18 @@ highlight - menu change colour when selected
 				removeMenu();
 			} else {
 				// Clicked on a world object
-				refinedSelectedPoint = getRefinedSelectedPoint(rawPointedAtPoint);
-				var height = getHeightAtMapPoint(refinedSelectedPoint.x, refinedSelectedPoint.z);
-
 				removeMenu();
+
+				refinedSelectedPoint = getRefinedSelectedPoint(rawPointedAtPoint);
+				var selectedHeight = getHeightAtMapPoint(refinedSelectedPoint.x, refinedSelectedPoint.z);
+				var mapHeight = getMapHeight(refinedSelectedPoint.x, refinedSelectedPoint.z);
+				
 				if (s.components) {
 					if (s.components.absorb != undefined) {
-						if (s != sentinel || height-1-SENTINEL_HEIGHT <= dolly.position.y) { // Can only absorbe Sentinel if we're higher
+						if (s.components.cube != undefined || mapHeight <= dolly.position.y) { // Can only absorbe cubes if we're higher
 							menu_absorb.components.object = selectedObject;
 							menu_absorb.position.x = refinedSelectedPoint.x;
-							menu_absorb.position.y = height + .3;
+							menu_absorb.position.y = selectedHeight + .3;
 							menu_absorb.position.z = refinedSelectedPoint.z;
 							menu_absorb.rotation.y = Math.atan2( ( dolly.position.x - menu_absorb.position.x ), ( dolly.position.z - menu_absorb.position.z ) );
 							entities.add(menu_absorb);						
@@ -297,7 +309,7 @@ highlight - menu change colour when selected
 					if (s.components.land != undefined && refinedSelectedPoint != undefined) {
 						if (DEBUG || energy > 0) {
 							// Check we can see the top
-							if (s.components.cube != undefined || height-1 <= dolly.position.y) {
+							if (s.components.cube != undefined || mapHeight-1 <= dolly.position.y) {
 								var canLand = false;
 								if (s == mapent) {
 									if (isMapFlat(refinedSelectedPoint.x, refinedSelectedPoint.z)) {
@@ -312,7 +324,7 @@ highlight - menu change colour when selected
 								}
 								if (canLand) {
 									menu_teleport.position.x = refinedSelectedPoint.x;
-									menu_teleport.position.y = height + .6;
+									menu_teleport.position.y = selectedHeight + .6;
 									menu_teleport.position.z = refinedSelectedPoint.z;
 									menu_teleport.rotation.y = Math.atan2( ( dolly.position.x - menu_teleport.position.x ), ( dolly.position.z - menu_teleport.position.z ) );
 									entities.add(menu_teleport);
@@ -323,7 +335,7 @@ highlight - menu change colour when selected
 					if (s.components.build != undefined && refinedSelectedPoint != undefined) {
 						if (DEBUG || energy > 0) {
 							// Check we can see the top
-							if (s.components.cube != undefined || height-1 <= dolly.position.y) {
+							if (s.components.cube != undefined || mapHeight-1 <= dolly.position.y) {
 								var canBuild = false;
 								if (s == mapent) {
 									if (isMapFlat(refinedSelectedPoint.x, refinedSelectedPoint.z)) {
@@ -342,13 +354,13 @@ highlight - menu change colour when selected
 								}
 								if (canBuild) {
 									menu_build_cube.position.x = refinedSelectedPoint.x;
-									menu_build_cube.position.y = height + .9;
+									menu_build_cube.position.y = selectedHeight + .9;
 									menu_build_cube.position.z = refinedSelectedPoint.z;
 									menu_build_cube.rotation.y = Math.atan2( ( dolly.position.x - menu_build_cube.position.x ), ( dolly.position.z - menu_build_cube.position.z ) );
 									entities.add(menu_build_cube);
 									
 									menu_build_tree.position.x = refinedSelectedPoint.x;
-									menu_build_tree.position.y = height + 1.2;
+									menu_build_tree.position.y = selectedHeight + 1.2;
 									menu_build_tree.position.z = refinedSelectedPoint.z;
 									menu_build_tree.rotation.y = Math.atan2( ( dolly.position.x - menu_build_cube.position.x ), ( dolly.position.z - menu_build_cube.position.z ) );
 									entities.add(menu_build_tree);
@@ -360,7 +372,7 @@ highlight - menu change colour when selected
 					// Position stats
 					setText(energy_text, "ENERGY: " + Math.floor(energy));
 					energy_text.position.x = refinedSelectedPoint.x;
-					energy_text.position.y = height + 1.5;
+					energy_text.position.y = selectedHeight + 1.5;
 					energy_text.position.z = refinedSelectedPoint.z;
 					energy_text.rotation.y = Math.atan2( ( dolly.position.x - energy_text.position.x ), ( dolly.position.z - energy_text.position.z ) );
 					entities.add(energy_text);
@@ -449,7 +461,8 @@ highlight - menu change colour when selected
 				diff -= Math.PI*2;
 			}
 			
-			directionalLight.color.setHex(0x00ff00);
+			//directionalLight.color.setHex(0x00ff00);
+			directionalLight.color.setHex(0x000000);
 			
 			if (Math.abs(diff) < sentinelView) {
 				directionalLight.color.setHex(0xffff00);
@@ -524,6 +537,21 @@ highlight - menu change colour when selected
 	}
 	
 	
+	function getMapHeight(x, z) {
+		raycaster.ray.origin.x = x;
+		raycaster.ray.origin.y = 100;
+		raycaster.ray.origin.z = z;
+		raycaster.ray.direction.set( 0, -1, 0 );
+
+		var intersects = raycaster.intersectObjects(entities.children, true);
+		var idx = 0;
+		while (intersects[idx].object != mapent) {
+			idx++;
+		}
+		return intersects[idx].point.y;
+	}
+	
+	
 	function isMapEmpty(x, z) {
 		raycaster.ray.origin.x = x;
 		raycaster.ray.origin.y = 100;
@@ -564,7 +592,7 @@ highlight - menu change colour when selected
 		energy += v;
 		if (energy < 0) {
 			energy = 0;
-			startLevel();
+			startAgain();
 			directionalLight.color.setHex(0x222222);
 		}
 	}
@@ -581,15 +609,15 @@ highlight - menu change colour when selected
 		var intersects = raycaster.intersectObjects(entities.children, true);
 
 		if (intersects.length > 0) {
-			var obj = intersects[0].object;
-			while (obj.components == undefined) {
+			var obj = getObject(intersects[0].object);
+			/*while (obj.components == undefined) {
 				//console.log("Selected " + obj.name);
 				if (obj.parent != undefined) {
 					obj = obj.parent;
 				} else {
 					break;
 				}
-			}
+			}*/
 
 			point.y = intersects[0].point.y;
 			

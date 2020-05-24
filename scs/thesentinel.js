@@ -14,7 +14,7 @@ export function generateMapData(SIZE) {
 		}
 	}
 	
-	for (var i=0 ; i<SIZE ; i++) {
+	for (var i=0 ; i<SIZE/2 ; i++) {
 			var x = getRandomInt(0, SIZE-1);
 			var z = getRandomInt(0, SIZE-1);
 			var rad  = getRandomInt(2, SIZE/3);
@@ -29,8 +29,13 @@ function raiseMap(map, SIZE, sx, sz, rad) {
 	for (var z=sz-rad ; z<sz+rad ; z++) {
 		if (z>=0 && z < SIZE) {
 			for (var x=sx-rad ; x<sx+rad ; x++) {
-				if (x>=0 && x < SIZE) {
-					map[x][z]++;
+				var a = x-sx;
+				var b = z-sz;
+				var dist = Math.sqrt( a*a + b*b );
+				if (dist <= rad) {
+					if (x>=0 && x < SIZE) {
+						map[x][z]+=2;
+					}
 				}
 			}
 		}
@@ -83,6 +88,13 @@ export function createSentinel(loader, callback) {
 		//var box = new THREE.Box3().setFromObject( obj );
 		//console.log( box.min, box.max, box.getSize() );
 
+		obj.traverse( function ( child ) {
+			if ( child instanceof THREE.Mesh ) {
+				//child.material.ambient.setHex(0xFF0000);
+				child.material.color.setHex(0xFF0000);
+				}
+			});
+							 
 		obj.components = {};
 		obj.components.absorb = 1;
 		obj.name = "Sentinel";
@@ -97,6 +109,13 @@ export function createTree(loader, callback) {
 		//var box = new THREE.Box3().setFromObject( obj );
 		//console.log( box.min, box.max, box.getSize() );
 
+		obj.traverse( function ( child ) {
+			if ( child instanceof THREE.Mesh ) {
+				//child.material.ambient.setHex(0xFF0000);
+				child.material.color.setHex(0x00FF00);
+				}
+			});
+							 
 		obj.components = {};
 		obj.components.absorb = 1;
 		obj.name = "Tree";
@@ -111,8 +130,15 @@ export function createCube(loader, callback) {
 		//var box = new THREE.Box3().setFromObject( obj );
 		//console.log( box.min, box.max, box.getSize() );
 
+		obj.traverse( function ( child ) {
+			if ( child instanceof THREE.Mesh ) {
+				//child.material.ambient.setHex(0xFF0000);
+				child.material.color.setHex(0xbc7a07);
+				}
+			});
+							 
 		obj.components = {};
-		obj.components.absorb = 1;
+		obj.components.absorb = 2;
 		obj.components.land = 1;
 		obj.components.build = 1;
 		obj.components.cube = 1;
