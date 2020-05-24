@@ -22,13 +22,15 @@ highlight - menu change colour when selected
 	const SENTINEL_HEIGHT = 2;
 	const START_ENERGY = 10;
 	
-	// Other vars
 	var scene, dolly;
 	var tex_loader = undefined; // Texture loader
-	var obj_loader = undefined; // Texture loader
+	var obj_loader = undefined;
+	var audioLoader;
+	var listener;
+
 	var map = undefined;
 	var entities = undefined; // Anything that can be selected
-	var mapent;
+	var mapent; // The map model
 	
 	var rawPointedAtObject;
 	var rawPointedAtPoint; // Where the player is currently pointing
@@ -57,14 +59,15 @@ highlight - menu change colour when selected
 	var menu_teleport;
 	
 
-	export function initGame(_scene, _dolly) {
+	export function initGame(_scene, _dolly, camera) {
 		scene = _scene;
 		dolly = _dolly;
 		
 		var manager = new THREE.LoadingManager();
 		tex_loader = new THREE.TextureLoader();
 		obj_loader = new OBJLoader(manager);
-		
+		audioLoader = new THREE.AudioLoader();
+
 		scene.add( new THREE.HemisphereLight( 0x303030, 0x101010 ) );
 
 		//directionalLight = new THREE.DirectionalLight( 0x00ff00, 1, 100 );
@@ -108,6 +111,17 @@ highlight - menu change colour when selected
 			scene.add(cube);
 		});
 		
+		listener = new THREE.AudioListener();
+		camera.add( listener );
+		
+		var sound1 = new THREE.PositionalAudio( listener );
+		audioLoader.load( 'sounds/wind.ogg', function ( buffer ) {
+			sound1.setBuffer( buffer );
+			sound1.setRefDistance( 20 );
+			sound1.play();
+
+		} );
+				
 		startAgain();
 	}
 	
@@ -247,14 +261,19 @@ highlight - menu change colour when selected
 			if (s == menu_absorb) {
 				entities.remove(menu_absorb.components.object);
 				if (menu_absorb.components.object == sentinel) {
-					// player has completed the level
-					sentinel = undefined;
-					entities.remove(map);
-					startLevel();
-					directionalLight.color.setHex(0x00ffff);
+					levelComplete();
 				}
 				incEnergy(menu_absorb.components.object.components.absorb);
 				removeMenu();
+				
+				var sound1 = new THREE.PositionalAudio( listener );
+				audioLoader.load( 'sounds/absorb.mp3', function ( buffer ) {
+					sound1.setBuffer( buffer );
+					sound1.setRefDistance( 20 );
+					sound1.play();
+
+				} );
+
 			} else if (s == menu_teleport) {
 				//console.log("Clicked on teleport");
 				var x = refinedSelectedPoint.x;
@@ -264,6 +283,15 @@ highlight - menu change colour when selected
 				dolly.position.y = getHeightAtMapPoint(x, z);
 				incEnergy(-1);
 				removeMenu();
+
+		var sound1 = new THREE.PositionalAudio( listener );
+		audioLoader.load( 'sounds/teleport.wav', function ( buffer ) {
+			sound1.setBuffer( buffer );
+			sound1.setRefDistance( 20 );
+			sound1.play();
+
+		} );
+
 			} else if (s == menu_build_cube) {
 				createCube(obj_loader, function(cube) {
 					var x = refinedSelectedPoint.x;
@@ -428,7 +456,7 @@ highlight - menu change colour when selected
 		// Process entinel
 		if (sentinel != undefined && player_moved) {
 			// Rotate sentinel
-			sentinel.rotation.y += .6 * delta;
+			sentinel.rotation.y += 0.3 * delta;
 			while (sentinel.rotation.y > Math.PI) {
 				sentinel.rotation.y -= Math.PI*2;
 			}
@@ -502,7 +530,16 @@ highlight - menu change colour when selected
 		directionalLight.color.setHex(0xff0000);
 		if (sentinalSeenPlayer == false) {
 			sentinalSeenPlayer = true;
-			incEnergy(-1);
+			incEnergy(-1, true);
+
+		var sound1 = new THREE.PositionalAudio( listener );
+		audioLoader.load( 'sounds/seen_by_sentinel.mp3', function ( buffer ) {
+			sound1.setBuffer( buffer );
+			sound1.setRefDistance( 20 );
+			sound1.play();
+
+		} );
+
 		}
 		//console.log("Energy: " + energy);
 	}
@@ -579,12 +616,20 @@ highlight - menu change colour when selected
 	}
 	
 	
-	function incEnergy(v) {
+	function incEnergy(v, death = false) {
 		energy += v;
 		if (energy < 0) {
 			energy = 0;
-			startAgain();
-			directionalLight.color.setHex(0x222222);
+			if (death) {
+				var sound1 = new THREE.PositionalAudio( listener );
+					audioLoader.load( 'sounds/died.wav', function ( buffer ) {
+					sound1.setBuffer( buffer );
+					sound1.setRefDistance( 20 );
+					sound1.play();
+				} );
+				startAgain();
+				directionalLight.color.setHex(0x222222);
+			}
 		}
 	}
 	
@@ -652,4 +697,20 @@ highlight - menu change colour when selected
 		}
 		return obj;
 	}
+	
+	
+	function levelComplete() {
+		var sound1 = new THREE.PositionalAudio( listener );
+			audioLoader.load( 'sounds/fanfare.mp3', function ( buffer ) {
+			sound1.setBuffer( buffer );
+			sound1.setRefDistance( 20 );
+			sound1.play();
+		} );
+		sentinel = undefined;
+		entities.remove(map);
+		startLevel();
+		directionalLight.color.setHex(0x00ffff);
+	}
+	
+	
 	
