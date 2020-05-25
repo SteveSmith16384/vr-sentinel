@@ -333,7 +333,7 @@ highlight - menu change colour when selected
 				
 				if (s.components) {
 					if (s.components.absorb != undefined) {
-						if (s.components.cube != undefined || mapHeight <= dolly.position.y) { // Can only absorbe cubes if we're higher
+						if (s.components.cube != undefined || mapHeight <= dolly.position.y+1) { // Can only absorbe cubes if we're higher
 							menu_absorb.components.object = selectedObject;
 							menu_absorb.position.x = refinedSelectedPoint.x;
 							menu_absorb.position.y = selectedHeight + .3;
@@ -345,7 +345,7 @@ highlight - menu change colour when selected
 					if (s.components.land != undefined && refinedSelectedPoint != undefined) {
 						if (DEBUG || energy > 0) {
 							// Check we can see the top
-							if (s.components.cube != undefined || mapHeight-1 <= dolly.position.y) {
+							if (s.components.cube != undefined || mapHeight <= dolly.position.y) {
 								var canLand = false;
 								if (s == mapent) {
 									if (isMapFlat(refinedSelectedPoint.x, refinedSelectedPoint.z)) {
@@ -461,7 +461,7 @@ highlight - menu change colour when selected
 		// Process entinel
 		if (sentinel != undefined && player_moved) {
 			// Rotate sentinel
-			sentinel.rotation.y += 0.3 * delta;
+			sentinel.rotation.y += 0.05235988 * delta; // 3 degrees every second
 			while (sentinel.rotation.y > Math.PI) {
 				sentinel.rotation.y -= Math.PI*2;
 			}
@@ -485,7 +485,6 @@ highlight - menu change colour when selected
 				diff -= Math.PI*2;
 			}
 			
-			//directionalLight.color.setHex(0x00ff00);
 			directionalLight.color.setHex(0x000000);
 			
 			if (Math.abs(diff) < sentinelView) {
@@ -651,14 +650,6 @@ highlight - menu change colour when selected
 
 		if (intersects.length > 0) {
 			var obj = getObject(intersects[0].object);
-			/*while (obj.components == undefined) {
-				//console.log("Selected " + obj.name);
-				if (obj.parent != undefined) {
-					obj = obj.parent;
-				} else {
-					break;
-				}
-			}*/
 
 			point.y = intersects[0].point.y;
 			
