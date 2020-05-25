@@ -83,7 +83,7 @@ export function createMap(map, SIZE) {
 
 
 export function createSentinel(loader, callback) {
-	loader.load("../models/sentinel.obj", function(obj) {
+	loader.load("models/sentinel.obj", function(obj) {
 
 		//var box = new THREE.Box3().setFromObject( obj );
 		//console.log( box.min, box.max, box.getSize() );
@@ -104,7 +104,7 @@ export function createSentinel(loader, callback) {
 }
 
 export function createTree(loader, callback) {
-	loader.load("../models/tree_europe.obj", function(obj) {
+	loader.load("models/tree_europe.obj", function(obj) {
 
 		//var box = new THREE.Box3().setFromObject( obj );
 		//console.log( box.min, box.max, box.getSize() );
@@ -125,7 +125,7 @@ export function createTree(loader, callback) {
 }
 
 export function createCube(loader, callback) {
-	loader.load("../models/block.obj", function(obj) {
+	loader.load("models/block.obj", function(obj) {
 
 		//var box = new THREE.Box3().setFromObject( obj );
 		//console.log( box.min, box.max, box.getSize() );

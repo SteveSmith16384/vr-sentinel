@@ -42,7 +42,7 @@ highlight - menu change colour when selected
 	var energy_text;
 	var player_moved;
 	var level_started;
-	var level = 0;
+	var level = 1;
 	var sentinalSeenPlayer;
 	var SIZE;
 	
@@ -131,7 +131,6 @@ highlight - menu change colour when selected
 			scene.remove(entities);
 		}
 		
-		level++;
 		energy = START_ENERGY;
 		player_moved = false;
 		sentinalSeenPlayer = false;
@@ -197,7 +196,7 @@ highlight - menu change colour when selected
 
 		dolly.position.x = SIZE/2;
 		dolly.position.y = 30;
-		dolly.position.z = SIZE+10;//0;//SIZE/2;
+		dolly.position.z = SIZE+10;
 
 		level_text = createText("LEVEL " + level, 80);
 		level_text.position.x = SIZE/2;
@@ -210,7 +209,6 @@ highlight - menu change colour when selected
 	
 	
 	function startAgain() {
-		//level = 0;
 		SIZE = 40;
 		
 		startLevel();
@@ -714,7 +712,7 @@ highlight - menu change colour when selected
 			sound1.play();
 		} );
 		sentinel = undefined;
-		entities.remove(map);
+		level++;
 		startLevel();
 		directionalLight.color.setHex(0x00ffff);
 	}
