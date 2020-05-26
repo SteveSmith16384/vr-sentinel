@@ -42,6 +42,7 @@ export function createText(text, size = 40) {
 		new THREE.PlaneGeometry(size/14, .5),
 		material1
 	);
+	mesh.name = "Text";
 	return mesh;
 }
 

@@ -1,8 +1,6 @@
 import * as THREE from '../build/three.module.js';
-import { createCuboid } from './helperfunctions.js';
 import { getRandomInt } from './numberfunctions.js';
 import { create2DArray } from './collections.js';
-import { createCuboidSides} from './helperfunctions.js';
 
 
 export function generateMapData(SIZE) {
@@ -93,7 +91,7 @@ export function createSentinel(loader, callback) {
 				child.material.color.setHex(0xFF0000);
 			}
 		});
-							 
+
 		obj.components = {};
 		obj.components.absorb = 1;
 		obj.name = "Sentinel";
@@ -114,7 +112,8 @@ export function createTree(loader, callback) {
 				child.material.color.setHex(0x00FF00);
 			}
 		});
-							 
+		obj.name = "Tree";
+
 		callback(obj);
 	});
 
@@ -124,8 +123,6 @@ export function createTree(loader, callback) {
 export function addTreeComponents(obj) {
 	obj.components = {};
 	obj.components.absorb = 1;
-	obj.name = "Tree";
-
 }
 
 
@@ -141,6 +138,7 @@ export function createCube(loader, callback) {
 				}
 			});
 
+			obj.name = "Cube";
 			//addCubeComponents(obj)
 			callback(obj);
 		});
@@ -153,6 +151,25 @@ export function addCubeComponents(obj) {
 		obj.components.land = 1;
 		obj.components.build = 1;
 		obj.components.cube = 1;
-		obj.name = "Cube";
 }
+
+
+export function createSentry(loader, callback) {
+	loader.load("models/sentry.obj", function(obj) {
+		//var box = new THREE.Box3().setFromObject( obj );
+		//console.log( box.min, box.max, box.getSize() );
+
+		obj.traverse( function ( child ) {
+			if ( child instanceof THREE.Mesh ) {
+				//child.material.ambient.setHex(0xFF0000);
+				child.material.color.setHex(0xff2222);
+			}
+		});
+		obj.name = "Sentry";
+		obj.components = {};
+		obj.components.absorb = 1;
+		callback(obj);
+	});
+}
+
 

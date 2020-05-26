@@ -1,8 +1,7 @@
 import * as THREE from './build/three.module.js';
-import { generateMapData, createMap, createCube, createSentinel, createTree, addCubeComponents, addTreeComponents } from './scs/thesentinel.js';
-//import { create2DArray } from './scs/collections.js';
+import { generateMapData, createMap, createCube, createSentinel, createTree, addCubeComponents, addTreeComponents, createSentry } from './scs/thesentinel.js';
 import { getRandomInt } from './scs/numberfunctions.js';
-import { createCuboid, createText, setText, createSphere } from './scs/helperfunctions.js';
+import { createText, setText, createSphere } from './scs/helperfunctions.js';
 import { OBJLoader } from './jsm/loaders/OBJLoader.js';
 
 /*
@@ -17,6 +16,7 @@ highlight - menu change colour when selected
 
 	// Settings
 	const DEBUG = false;
+	const DEBUG_SENTINELS = true;
 	const sentinelView = Math.PI / 8;
 	const SENTINEL_HEIGHT = 2;
 	const START_ENERGY = 10;
@@ -30,6 +30,7 @@ highlight - menu change colour when selected
 	var map = undefined;
 	var entities = undefined; // Anything that can be selected
 	var mapent; // The map model
+	var sentries;
 	
 	var rawPointedAtObject;
 	var rawPointedAtPoint; // Where the player is currently pointing
@@ -105,11 +106,6 @@ highlight - menu change colour when selected
 		menuitems.push(energy_text);
 
 		// Create pointer
-		/*createCuboid(tex_loader, 'textures/thesentinel/lavatile.jpg', .1, function(cube) {
-			highlight = cube;
-			highlight.name = "highlight";
-			scene.add(highlight);
-		});*/
 		highlight = createSphere(.1);
 		highlight.name = "highlight";
 		scene.add(highlight);
@@ -142,6 +138,8 @@ highlight - menu change colour when selected
 		
 		entities = new THREE.Group();
 		scene.add(entities);
+
+		sentries = [];
 
 		map = generateMapData(SIZE);
 
@@ -198,14 +196,31 @@ highlight - menu change colour when selected
 			sentinel = obj;
 
 			entities.add(obj);
-			setHighestPoint(obj, map, SIZE);
+			setHighestPoint(obj);
 		});
 
-		if (level > 1) {
-			for (var i=1 ; i<level ; i++) {
+		//todo if (level > 1) {
+			//todo for (var i=1 ; i<level ; i++) {
+			for (var i=0 ; i<1 ; i++) {
+				var x = getRandomInt(2, SIZE-3)+.5;
+				var z = getRandomInt(2, SIZE-3)+.5;
+				if (isMapFlat(x, z) && isMapEmpty(x, z)) {
+					createSentry(obj_loader, function(sentry) {
+						var height = getHeightAtMapPoint(x, z)
+						sentry.position.x = x;
+						sentry.position.y = height;
+						sentry.position.z = z;
+
+						entities.add(sentry);
+						sentries.push(sentry);
+						console.log("added sentry to " + x + ", " + z);
+					});
+				} else {
+					i--;
+				}
 			}
-		}
-		
+		//}
+
 		dolly.position.x = SIZE/2;
 		dolly.position.y = 30;
 		dolly.position.z = SIZE+10;
@@ -226,7 +241,7 @@ highlight - menu change colour when selected
 		startLevel();
 	}
 
-	function setHighestPoint() {
+	function setHighestPoint(s) {
 		var hx=0, hz=0, highest=0;
 		for (var z=0 ; z<SIZE-1 ; z++) {
 			for (var x=0 ; x<SIZE-1 ; x++) {
@@ -242,9 +257,9 @@ highlight - menu change colour when selected
 		}
 		
 		removeEntitiesAt(hx +.5, hz +.5);
-		sentinel.position.x = hx +.5;
-		sentinel.position.y = highest;
-		sentinel.position.z = hz +.5;		
+		s.position.x = hx +.5;
+		s.position.y = highest;
+		s.position.z = hz +.5;		
 	}
 
 
@@ -255,9 +270,9 @@ highlight - menu change colour when selected
 			// Set player start position
 			var x = getRandomInt(2, SIZE-3);
 			var z = getRandomInt(2, SIZE-3);
-			while (isMapEmpty(x, z) == false) {
-				x = getRandomInt(SIZE/2, SIZE-1);
-				z = getRandomInt(SIZE/2, SIZE-1);
+			while (isMapEmpty(x, z) == false || isMapFlat(x, z) == false) {
+				x = getRandomInt(2, SIZE-3);
+				z = getRandomInt(2, SIZE-3);
 			}
 			var height = getHeightAtMapPoint(x, z)
 			dolly.position.x = x + .5;
@@ -358,7 +373,7 @@ highlight - menu change colour when selected
 					if (s.components.land != undefined && refinedSelectedPoint != undefined) {
 						if (DEBUG || energy > 0) {
 							// Check we can see the top
-							if (s.components.cube != undefined || mapHeight <= dolly.position.y) {
+							if (s.components.cube != undefined || mapHeight <= dolly.position.y+1) {
 								var canLand = false;
 								if (s == mapent) {
 									if (isMapFlat(refinedSelectedPoint.x, refinedSelectedPoint.z)) {
@@ -473,16 +488,27 @@ highlight - menu change colour when selected
 		
 		// Process entinel
 		if (sentinel != undefined && player_moved) {
-			// Rotate sentinel
-			sentinel.rotation.y += 0.05235988 * delta; // 3 degrees every second
-			while (sentinel.rotation.y > Math.PI) {
-				sentinel.rotation.y -= Math.PI*2;
+			rotateSentinel(sentinel, delta);
+			// Rotate sentries
+			for (var i=0 ; i<sentries.length ; i++) {
+				var s = sentries[i];
+				rotateSentinel(s, delta);
 			}
-			while (sentinel.rotation.y < -Math.PI) {
-				sentinel.rotation.y += Math.PI*2;
+		}
+	}
+
+
+	function rotateSentinel(s, delta) {
+			// Rotate sentinel
+			s.rotation.y += 0.05235988 * delta; // 3 degrees every second
+			while (s.rotation.y > Math.PI) {
+				s.rotation.y -= Math.PI*2;
+			}
+			while (s.rotation.y < -Math.PI) {
+				s.rotation.y += Math.PI*2;
 			}
 			
-			var angleStoP = getAngleFromSentinelToPlayer();
+			var angleStoP = getAngleFromSentinelToPlayer(s);
 			while (angleStoP > Math.PI) {
 				angleStoP -= Math.PI*2;
 			}
@@ -490,7 +516,7 @@ highlight - menu change colour when selected
 				angleStoP += Math.PI*2;
 			}
 
-			let diff = -sentinel.rotation.y - angleStoP;
+			let diff = -s.rotation.y - angleStoP;
 			while (diff < -Math.PI) {
 				diff += Math.PI*2;
 			}
@@ -504,18 +530,18 @@ highlight - menu change colour when selected
 				directionalLight.color.setHex(0xffff00);
 				
 				// Can Sentinel actually see player?
-				raycaster.ray.origin.x = sentinel.position.x;
-				raycaster.ray.origin.y = sentinel.position.y + (SENTINEL_HEIGHT);
-				raycaster.ray.origin.z = sentinel.position.z;
+				raycaster.ray.origin.x = s.position.x;
+				raycaster.ray.origin.y = s.position.y + (SENTINEL_HEIGHT);
+				raycaster.ray.origin.z = s.position.z;
 				
-				var vecToPlayer = new THREE.Vector3(dolly.position.x-sentinel.position.x, dolly.position.y-sentinel.position.y-0.2, dolly.position.z-sentinel.position.z);
+				var vecToPlayer = new THREE.Vector3(dolly.position.x-s.position.x, dolly.position.y-s.position.y-0.2, dolly.position.z-s.position.z);
 				var vecNrm = new THREE.Vector3(vecToPlayer.x, vecToPlayer.y, vecToPlayer.z);
 				vecNrm.normalize();
 				
 				raycaster.ray.direction.x = vecNrm.x;
 				raycaster.ray.direction.y = vecNrm.y;
 				raycaster.ray.direction.z = vecNrm.z;
-				
+
 				var intersects = raycaster.intersectObjects(entities.children, true);
 				if (intersects.length == 0) {
 					seenBySentinel();
@@ -528,18 +554,7 @@ highlight - menu change colour when selected
 			} else {
 				sentinalSeenPlayer = false;
 			}
-		}
 
-/*
-		for (var s of entities.children) {
-			if (s.components) {
-				// Point to face camera
-				if (s.components.face != undefined) {
-					s.rotation.y = Math.atan2( ( dolly.position.x - s.position.x ), ( dolly.position.z - s.position.z ) );
-				}
-			}
-		}
-*/		
 	}
 
 
@@ -549,22 +564,20 @@ highlight - menu change colour when selected
 			sentinalSeenPlayer = true;
 			incEnergy(-1, true);
 
-		var sound1 = new THREE.PositionalAudio( listener );
-		audioLoader.load( 'sounds/seen_by_sentinel.mp3', function ( buffer ) {
-			sound1.setBuffer( buffer );
-			sound1.setRefDistance( 20 );
-			sound1.play();
-
-		} );
-
+			var sound1 = new THREE.PositionalAudio( listener );
+			audioLoader.load( 'sounds/seen_by_sentinel.mp3', function ( buffer ) {
+				sound1.setBuffer( buffer );
+				sound1.setRefDistance( 20 );
+				sound1.play();
+			});
 		}
 		//console.log("Energy: " + energy);
 	}
 
 
-	function getAngleFromSentinelToPlayer() {
-		var x = dolly.position.x - sentinel.position.x;
-		var z = dolly.position.z - sentinel.position.z;
+	function getAngleFromSentinelToPlayer(s) {
+		var x = dolly.position.x - s.position.x;
+		var z = dolly.position.z - s.position.z;
 		var rads = Math.atan2(z, x);
 		return rads;
 	}
