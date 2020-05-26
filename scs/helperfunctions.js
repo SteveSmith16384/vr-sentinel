@@ -61,6 +61,15 @@ export function setText(mesh, text, size = 40) {
 }
 
 
+export function createSphere(rad) {
+	var v = new THREE.Vector3(0, 0, 0);
+	var geometry = new THREE.IcosahedronBufferGeometry(rad, 2);
+	var material = new THREE.MeshPhongMaterial({color: 0xffffff });
+	const sphere = new THREE.Mesh(geometry, material);
+	return sphere;
+
+}
+
 export function createCuboid(loader, tex, scl, callback) {
 	loader.load(tex, function ( texture ) {
 

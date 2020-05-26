@@ -1,8 +1,8 @@
 import * as THREE from './build/three.module.js';
-import { generateMapData, createMap, createCube, createSentinel, createTree } from './scs/thesentinel.js';
-import { create2DArray } from './scs/collections.js';
+import { generateMapData, createMap, createCube, createSentinel, createTree, addCubeComponents, addTreeComponents } from './scs/thesentinel.js';
+//import { create2DArray } from './scs/collections.js';
 import { getRandomInt } from './scs/numberfunctions.js';
-import { createCuboid, createText, setText } from './scs/helperfunctions.js';
+import { createCuboid, createText, setText, createSphere } from './scs/helperfunctions.js';
 import { OBJLoader } from './jsm/loaders/OBJLoader.js';
 
 /*
@@ -46,8 +46,8 @@ highlight - menu change colour when selected
 	var sentinalSeenPlayer;
 	var SIZE;
 	
-	var tempMatrix = new THREE.Matrix4();
-	var raycaster = new THREE.Raycaster();
+	const tempMatrix = new THREE.Matrix4();
+	const raycaster = new THREE.Raycaster();
 	const clock = new THREE.Clock();
 	var directionalLight;
 	
@@ -105,12 +105,15 @@ highlight - menu change colour when selected
 		menuitems.push(energy_text);
 
 		// Create pointer
-		createCuboid(tex_loader, 'textures/thesentinel/lavatile.jpg', .1, function(cube) {
+		/*createCuboid(tex_loader, 'textures/thesentinel/lavatile.jpg', .1, function(cube) {
 			highlight = cube;
 			highlight.name = "highlight";
-			scene.add(cube);
-		});
-		
+			scene.add(highlight);
+		});*/
+		highlight = createSphere(.1);
+		highlight.name = "highlight";
+		scene.add(highlight);
+	
 		listener = new THREE.AudioListener();
 		camera.add( listener );
 		
@@ -149,42 +152,46 @@ highlight - menu change colour when selected
 		entities.add(mapent);
 
 		// Add cubes to absorb
-		for (var i=0 ; i<25 ; i++) {
-			createCube(obj_loader, function(cube) {
+		createCube(obj_loader, function(cube2) {
+			for (var i=0 ; i<25 ; i++) {
 				var x = getRandomInt(2, SIZE-3)+.5;
 				var z = getRandomInt(2, SIZE-3)+.5;
 				if (isMapFlat(x, z) && isMapEmpty(x, z)) {
-						var height = getHeightAtMapPoint(x, z)
-						cube.position.x = x;
-						cube.position.y = height;//+.5;
-						cube.position.z = z;
+					var cube = cube2.clone();
+					addCubeComponents(cube);
+					var height = getHeightAtMapPoint(x, z);
+					cube.position.x = x;
+					cube.position.y = height;
+					cube.position.z = z;
 
-						entities.add(cube);
+					entities.add(cube);
 				} else {
-					i--; // todo - this is not quite right
+					i--;
 				}
 				//console.log("Cube added");
-			});
-		}
+			}
+		});
 
 		// Add trees to absorb
-		for (var i=0 ; i<25 ; i++) {
-			createTree(obj_loader, function(tree) {
+		createTree(obj_loader, function(tree2) {
+			for (var i=0 ; i<25 ; i++) {
 				var x = getRandomInt(2, SIZE-3)+.5;
 				var z = getRandomInt(2, SIZE-3)+.5;
 				if (isMapFlat(x, z) && isMapEmpty(x, z)) {
-						var height = getHeightAtMapPoint(x, z)
-						tree.position.x = x;
-						tree.position.y = height;
-						tree.position.z = z;
+					var tree = tree2.clone();
+					addTreeComponents(tree);
+					var height = getHeightAtMapPoint(x, z)
+					tree.position.x = x;
+					tree.position.y = height;
+					tree.position.z = z;
 
-						entities.add(tree);
+					entities.add(tree);
 				} else {
 					i--;
 				}
 				//console.log("Tree added");
-			});
-		}
+			}
+		});
 
 		// Sentinel
 		createSentinel(obj_loader, function (obj) {
@@ -194,6 +201,11 @@ highlight - menu change colour when selected
 			setHighestPoint(obj, map, SIZE);
 		});
 
+		if (level > 1) {
+			for (var i=1 ; i<level ; i++) {
+			}
+		}
+		
 		dolly.position.x = SIZE/2;
 		dolly.position.y = 30;
 		dolly.position.z = SIZE+10;
@@ -256,7 +268,7 @@ highlight - menu change colour when selected
 			return;
 		}
 
-		player_moved = true;
+		player_moved = true; // Start Sentinel rotating
 
 		if (rawPointedAtObject != undefined) {
 			selectedObject = getObject(rawPointedAtObject);
@@ -289,16 +301,16 @@ highlight - menu change colour when selected
 				incEnergy(-1);
 				removeMenu();
 
-		var sound1 = new THREE.PositionalAudio( listener );
-		audioLoader.load( 'sounds/teleport.wav', function ( buffer ) {
-			sound1.setBuffer( buffer );
-			sound1.setRefDistance( 20 );
-			sound1.play();
-
-		} );
+				var sound1 = new THREE.PositionalAudio( listener );
+				audioLoader.load( 'sounds/teleport.wav', function ( buffer ) {
+					sound1.setBuffer( buffer );
+					sound1.setRefDistance( 20 );
+					sound1.play();
+				} );
 
 			} else if (s == menu_build_cube) {
 				createCube(obj_loader, function(cube) {
+					addCubeComponents(cube);
 					var x = refinedSelectedPoint.x;
 					var z = refinedSelectedPoint.z;
 					var height = getHeightAtMapPoint(x, z)
@@ -312,6 +324,7 @@ highlight - menu change colour when selected
 				removeMenu();
 			} else if (s == menu_build_tree) {
 				createTree(obj_loader, function(tree) {
+					addTreeComponents(cube);
 					var x = refinedSelectedPoint.x;
 					var z = refinedSelectedPoint.z;
 					var height = getHeightAtMapPoint(x, z)

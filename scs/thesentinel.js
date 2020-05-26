@@ -9,8 +9,7 @@ export function generateMapData(SIZE) {
 	var map = create2DArray(SIZE); // Array of heights of corners of each plane
 	for (var z=0 ; z<SIZE-1 ; z++) {
 		for (var x=0 ; x<SIZE-1 ; x++) {
-			var rnd = 0;//getRandomInt(0, 4);
-			map[x][z] = rnd;
+			map[x][z] = 0;
 		}
 	}
 	
@@ -92,8 +91,8 @@ export function createSentinel(loader, callback) {
 			if ( child instanceof THREE.Mesh ) {
 				//child.material.ambient.setHex(0xFF0000);
 				child.material.color.setHex(0xFF0000);
-				}
-			});
+			}
+		});
 							 
 		obj.components = {};
 		obj.components.absorb = 1;
@@ -113,38 +112,47 @@ export function createTree(loader, callback) {
 			if ( child instanceof THREE.Mesh ) {
 				//child.material.ambient.setHex(0xFF0000);
 				child.material.color.setHex(0x00FF00);
-				}
-			});
+			}
+		});
 							 
-		obj.components = {};
-		obj.components.absorb = 1;
-		obj.name = "Tree";
 		callback(obj);
 	});
 
 }
 
+
+export function addTreeComponents(obj) {
+	obj.components = {};
+	obj.components.absorb = 1;
+	obj.name = "Tree";
+
+}
+
+
 export function createCube(loader, callback) {
-	loader.load("models/block.obj", function(obj) {
+		loader.load("models/block.obj", function(obj) {
+			//var box = new THREE.Box3().setFromObject( obj );
+			//console.log( box.min, box.max, box.getSize() );
 
-		//var box = new THREE.Box3().setFromObject( obj );
-		//console.log( box.min, box.max, box.getSize() );
-
-		obj.traverse( function ( child ) {
-			if ( child instanceof THREE.Mesh ) {
-				//child.material.ambient.setHex(0xFF0000);
-				child.material.color.setHex(0xbc7a07);
+			obj.traverse( function ( child ) {
+				if ( child instanceof THREE.Mesh ) {
+					//child.material.ambient.setHex(0xFF0000);
+					child.material.color.setHex(0xbc7a07);
 				}
 			});
-							 
+
+			//addCubeComponents(obj)
+			callback(obj);
+		});
+}
+
+
+export function addCubeComponents(obj) {
 		obj.components = {};
 		obj.components.absorb = 2;
 		obj.components.land = 1;
 		obj.components.build = 1;
 		obj.components.cube = 1;
 		obj.name = "Cube";
-		callback(obj);
-	});
-
 }
 
