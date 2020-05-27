@@ -89,6 +89,7 @@ export function createSentinel(loader, callback) {
 			if ( child instanceof THREE.Mesh ) {
 				//child.material.ambient.setHex(0xFF0000);
 				child.material.color.setHex(0xFF0000);
+				console.log("Changed Sentinel colour");
 			}
 		});
 
@@ -97,6 +98,14 @@ export function createSentinel(loader, callback) {
 		obj.components.seenPlayer = 0;
 		obj.name = "Sentinel";
 		callback(obj);
+	},
+	// called when loading is in progresses
+	function ( xhr ) {
+		//console.log( ( xhr.loaded / xhr.total * 100 ) + '% loaded' );
+	},
+	// called when loading has errors
+	function ( error ) {
+		console.log( 'An error happened:' + error);
 	});
 
 }
@@ -116,6 +125,14 @@ export function createTree(loader, callback) {
 		obj.name = "Tree";
 
 		callback(obj);
+	},
+	// called when loading is in progresses
+	function ( xhr ) {
+		//console.log( ( xhr.loaded / xhr.total * 100 ) + '% loaded' );
+	},
+	// called when loading has errors
+	function ( error ) {
+		console.log( 'An error happened:' + error);
 	});
 
 }
@@ -128,21 +145,29 @@ export function addTreeComponents(obj) {
 
 
 export function createCube(loader, callback) {
-		loader.load("models/block.obj", function(obj) {
-			//var box = new THREE.Box3().setFromObject( obj );
-			//console.log( box.min, box.max, box.getSize() );
+	loader.load("models/block.obj", function(obj) {
+		//var box = new THREE.Box3().setFromObject( obj );
+		//console.log( box.min, box.max, box.getSize() );
 
-			obj.traverse( function ( child ) {
-				if ( child instanceof THREE.Mesh ) {
-					//child.material.ambient.setHex(0xFF0000);
-					child.material.color.setHex(0xbc7a07);
-				}
-			});
-
-			obj.name = "Cube";
-			//addCubeComponents(obj)
-			callback(obj);
+		obj.traverse( function ( child ) {
+			if ( child instanceof THREE.Mesh ) {
+				//child.material.ambient.setHex(0xFF0000);
+				child.material.color.setHex(0xbc7a07);
+			}
 		});
+
+		obj.name = "Cube";
+		//addCubeComponents(obj)
+		callback(obj);
+	},
+	// called when loading is in progresses
+	function ( xhr ) {
+		//console.log( ( xhr.loaded / xhr.total * 100 ) + '% loaded' );
+	},
+	// called when loading has errors
+	function ( error ) {
+		console.log( 'An error happened:' + error);
+	});
 }
 
 
@@ -164,6 +189,7 @@ export function createSentry(loader, callback) {
 			if ( child instanceof THREE.Mesh ) {
 				//child.material.ambient.setHex(0xFF0000);
 				child.material.color.setHex(0xff2222);
+				console.log("Changed Sentry colour");
 			}
 		});
 		obj.name = "Sentry";
@@ -171,6 +197,14 @@ export function createSentry(loader, callback) {
 		obj.components.absorb = 1;
 		obj.components.seenPlayer = 0;
 		callback(obj);
+	},
+	// called when loading is in progresses
+	function ( xhr ) {
+		//console.log( ( xhr.loaded / xhr.total * 100 ) + '% loaded' );
+	},
+	// called when loading has errors
+	function ( error ) {
+		console.log( 'An error happened:' + error);
 	});
 }
 
