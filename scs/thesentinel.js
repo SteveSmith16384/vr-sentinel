@@ -86,7 +86,8 @@ export function createSentinel(loader, callback) {
 		//console.log( box.min, box.max, box.getSize() );
 
 		obj.traverse( function ( child ) {
-			if ( child instanceof THREE.Mesh ) {
+//			if ( child instanceof THREE.Mesh ) {
+			if (child.material != undefined) {
 				//child.material.ambient.setHex(0xFF0000);
 				child.material.color.setHex(0xFF0000);
 				console.log("Changed Sentinel colour");
@@ -117,8 +118,9 @@ export function createTree(loader, callback) {
 		//console.log( box.min, box.max, box.getSize() );
 
 		obj.traverse( function ( child ) {
-			if ( child instanceof THREE.Mesh ) {
-				//child.material.ambient.setHex(0xFF0000);
+//			if ( child instanceof THREE.Mesh ) {
+			if (child.material != undefined) {
+		//child.material.ambient.setHex(0xFF0000);
 				child.material.color.setHex(0x00FF00);
 			}
 		});
@@ -150,8 +152,9 @@ export function createCube(loader, callback) {
 		//console.log( box.min, box.max, box.getSize() );
 
 		obj.traverse( function ( child ) {
-			if ( child instanceof THREE.Mesh ) {
-				//child.material.ambient.setHex(0xFF0000);
+			//if ( child instanceof THREE.Mesh ) {
+			if (child.material != undefined) {
+					//child.material.ambient.setHex(0xFF0000);
 				child.material.color.setHex(0xbc7a07);
 			}
 		});
@@ -186,7 +189,8 @@ export function createSentry(loader, callback) {
 		//console.log( box.min, box.max, box.getSize() );
 
 		obj.traverse( function ( child ) {
-			if ( child instanceof THREE.Mesh ) {
+			if (child.material != undefined) {
+				//if ( child instanceof THREE.Mesh ) {
 				//child.material.ambient.setHex(0xFF0000);
 				child.material.color.setHex(0xff2222);
 				console.log("Changed Sentry colour");

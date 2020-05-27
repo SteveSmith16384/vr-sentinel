@@ -9,6 +9,10 @@ I haven't actually played the original since about 1990, so there may be several
 The colour of the landscape denotes status: white means The Sentinel is not looking at you.  Yellow means it is looking in your direction but cannot see you.  Red means it has seen you and your energy is reduced by 1.
 
 
+## Game Notes
+* Sentries are added after the first level.
+
+
 ## Credits
 * Original game design by Geoff Crammond.
 * Programmed by Stephen Carlyle-Smith.
