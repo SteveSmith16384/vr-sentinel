@@ -201,18 +201,18 @@ highlight - menu change colour when selected
 				createSentry(obj_loader, function(sentry) {
 					var x = getRandomInt(2, SIZE-3)+.5;
 					var z = getRandomInt(2, SIZE-3)+.5;
-					if (isMapFlat(x, z) && isMapEmpty(x, z)) {
-						var height = getHeightAtMapPoint(x, z)
-						sentry.position.x = x;
-						sentry.position.y = height;
-						sentry.position.z = z;
-
-						entities.add(sentry);
-						sentries.push(sentry);
-						//console.log("added sentry to " + x + ", " + z);
-					} else {
-						i--;
+					while (isMapFlat(x, z) == false || isMapEmpty(x, z) == false) {
+						x = getRandomInt(2, SIZE-3)+.5;
+						z = getRandomInt(2, SIZE-3)+.5;
 					}
+					var height = getHeightAtMapPoint(x, z)
+					sentry.position.x = x;
+					sentry.position.y = height;
+					sentry.position.z = z;
+
+					entities.add(sentry);
+					sentries.push(sentry);
+					//console.log("added sentry to " + x + ", " + z);
 				});
 			}
 		}
@@ -335,7 +335,7 @@ highlight - menu change colour when selected
 				removeMenu();
 			} else if (s == menu_build_tree) {
 				createTree(obj_loader, function(tree) {
-					addTreeComponents(cube);
+					addTreeComponents(tree);
 					var x = refinedSelectedPoint.x;
 					var z = refinedSelectedPoint.z;
 					var height = getHeightAtMapPoint(x, z)
