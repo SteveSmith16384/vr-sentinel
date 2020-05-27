@@ -94,6 +94,7 @@ export function createSentinel(loader, callback) {
 
 		obj.components = {};
 		obj.components.absorb = 1;
+		obj.components.seenPlayer = 0;
 		obj.name = "Sentinel";
 		callback(obj);
 	});
@@ -168,6 +169,7 @@ export function createSentry(loader, callback) {
 		obj.name = "Sentry";
 		obj.components = {};
 		obj.components.absorb = 1;
+		obj.components.seenPlayer = 0;
 		callback(obj);
 	});
 }

@@ -44,7 +44,7 @@ highlight - menu change colour when selected
 	var player_moved;
 	var level_started;
 	var level = 1;
-	var sentinalSeenPlayer;
+	//var sentinalSeenPlayer;
 	var SIZE;
 	
 	const tempMatrix = new THREE.Matrix4();
@@ -71,14 +71,12 @@ highlight - menu change colour when selected
 
 		scene.add( new THREE.HemisphereLight( 0x303030, 0x101010 ) );
 
-		//directionalLight = new THREE.DirectionalLight( 0x00ff00, 1, 100 );
 		directionalLight = new THREE.DirectionalLight( 0xffffff, 1, 100 );
 		directionalLight.position.set( 0, 1, 0 );
 		directionalLight.target.position.set( 0, 0, 0 );
 		directionalLight.castShadow = true;
 		scene.add( directionalLight );
 
-		//scene.background = new THREE.Color( 0x666666 );
 		scene.background = new THREE.Color( 0x000000 );
 
 		// Create menu items
@@ -132,7 +130,6 @@ highlight - menu change colour when selected
 		
 		energy = START_ENERGY;
 		player_moved = false;
-		sentinalSeenPlayer = false;
 		level_started = false;
 		SIZE += 10;
 		
@@ -199,13 +196,12 @@ highlight - menu change colour when selected
 			setHighestPoint(obj);
 		});
 
-		//todo if (level > 1) {
-			//todo for (var i=1 ; i<level ; i++) {
-			for (var i=0 ; i<1 ; i++) {
-				var x = getRandomInt(2, SIZE-3)+.5;
-				var z = getRandomInt(2, SIZE-3)+.5;
-				if (isMapFlat(x, z) && isMapEmpty(x, z)) {
-					createSentry(obj_loader, function(sentry) {
+		if (level > 1) {
+			for (var i=1 ; i<level ; i++) {
+				createSentry(obj_loader, function(sentry) {
+					var x = getRandomInt(2, SIZE-3)+.5;
+					var z = getRandomInt(2, SIZE-3)+.5;
+					if (isMapFlat(x, z) && isMapEmpty(x, z)) {
 						var height = getHeightAtMapPoint(x, z)
 						sentry.position.x = x;
 						sentry.position.y = height;
@@ -213,13 +209,13 @@ highlight - menu change colour when selected
 
 						entities.add(sentry);
 						sentries.push(sentry);
-						console.log("added sentry to " + x + ", " + z);
-					});
-				} else {
-					i--;
-				}
+						//console.log("added sentry to " + x + ", " + z);
+					} else {
+						i--;
+					}
+				});
 			}
-		//}
+		}
 
 		dolly.position.x = SIZE/2;
 		dolly.position.y = 30;
@@ -544,25 +540,27 @@ highlight - menu change colour when selected
 
 				var intersects = raycaster.intersectObjects(entities.children, true);
 				if (intersects.length == 0) {
-					seenBySentinel();
+					seenBySentinel(s);
 				} else if (intersects.length > 0) {
 					var toPlayer = vecToPlayer.length();
 					if (intersects[0].distance > toPlayer) {
-						seenBySentinel();
+						seenBySentinel(s);
 					}
 				}
 			} else {
-				sentinalSeenPlayer = false;
+				s.components.seenPlayer = 0;
 			}
 
 	}
 
 
-	function seenBySentinel() {
+	function seenBySentinel(s) {
 		directionalLight.color.setHex(0xff0000);
-		if (sentinalSeenPlayer == false) {
-			sentinalSeenPlayer = true;
+		if (s.components.seenPlayer == 0) {
+			s.components.seenPlayer = 1;
 			incEnergy(-1, true);
+
+			console.log("Seen,  Energy now: " + energy);
 
 			var sound1 = new THREE.PositionalAudio( listener );
 			audioLoader.load( 'sounds/seen_by_sentinel.mp3', function ( buffer ) {
@@ -571,7 +569,6 @@ highlight - menu change colour when selected
 				sound1.play();
 			});
 		}
-		//console.log("Energy: " + energy);
 	}
 
 
