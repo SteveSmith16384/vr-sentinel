@@ -352,14 +352,15 @@ highlight - menu change colour when selected
 				refinedSelectedPoint = getRefinedSelectedPoint(rawPointedAtPoint);
 				var selectedHeight = getHeightAtMapPoint(refinedSelectedPoint.x, refinedSelectedPoint.z);
 				var mapHeight = getMapHeight(refinedSelectedPoint.x, refinedSelectedPoint.z);
+				var menu_pos = getMenuPosition(refinedSelectedPoint);
 				
 				if (s.components) {
 					if (s.components.absorb != undefined) {
 						if (s.components.cube != undefined || mapHeight <= dolly.position.y+1) { // Can only absorbe cubes if we're higher
 							menu_absorb.components.object = selectedObject;
-							menu_absorb.position.x = refinedSelectedPoint.x;
-							menu_absorb.position.y = selectedHeight + .3;
-							menu_absorb.position.z = refinedSelectedPoint.z;
+							menu_absorb.position.x = menu_pos.x;//refinedSelectedPoint.x;
+							menu_absorb.position.y = menu_pos.y + .3;//selectedHeight + .3;
+							menu_absorb.position.z = menu_pos.z;//refinedSelectedPoint.z;
 							menu_absorb.rotation.y = Math.atan2( ( dolly.position.x - menu_absorb.position.x ), ( dolly.position.z - menu_absorb.position.z ) );
 							entities.add(menu_absorb);						
 						}
@@ -377,9 +378,9 @@ highlight - menu change colour when selected
 									canLand = true;
 								}
 								if (canLand) {
-									menu_teleport.position.x = refinedSelectedPoint.x;
-									menu_teleport.position.y = selectedHeight + .6;
-									menu_teleport.position.z = refinedSelectedPoint.z;
+									menu_teleport.position.x = menu_pos.x;//refinedSelectedPoint.x;
+									menu_teleport.position.y = menu_pos.y+.6;//selectedHeight + .6;
+									menu_teleport.position.z = menu_pos.z;//refinedSelectedPoint.z;
 									menu_teleport.rotation.y = Math.atan2( ( dolly.position.x - menu_teleport.position.x ), ( dolly.position.z - menu_teleport.position.z ) );
 									entities.add(menu_teleport);
 								}
@@ -399,15 +400,15 @@ highlight - menu change colour when selected
 									canBuild = true;
 								}
 								if (canBuild) {
-									menu_build_cube.position.x = refinedSelectedPoint.x;
-									menu_build_cube.position.y = selectedHeight + .9;
-									menu_build_cube.position.z = refinedSelectedPoint.z;
+									menu_build_cube.position.x = menu_pos.x;//refinedSelectedPoint.x;
+									menu_build_cube.position.y = menu_pos.y+.9;//selectedHeight + .9;
+									menu_build_cube.position.z = menu_pos.z;//refinedSelectedPoint.z;
 									menu_build_cube.rotation.y = Math.atan2( ( dolly.position.x - menu_build_cube.position.x ), ( dolly.position.z - menu_build_cube.position.z ) );
 									entities.add(menu_build_cube);
 									
-									menu_build_tree.position.x = refinedSelectedPoint.x;
-									menu_build_tree.position.y = selectedHeight + 1.2;
-									menu_build_tree.position.z = refinedSelectedPoint.z;
+									menu_build_tree.position.x = menu_pos.x;//refinedSelectedPoint.x;
+									menu_build_tree.position.y = menu_pos.y+1.2;//selectedHeight + 1.2;
+									menu_build_tree.position.z = menu_pos.z;//refinedSelectedPoint.z;
 									menu_build_tree.rotation.y = Math.atan2( ( dolly.position.x - menu_build_cube.position.x ), ( dolly.position.z - menu_build_cube.position.z ) );
 									entities.add(menu_build_tree);
 								}
@@ -417,9 +418,9 @@ highlight - menu change colour when selected
 					
 					// Position stats
 					setText(energy_text, "ENERGY: " + Math.floor(energy), 40);
-					energy_text.position.x = refinedSelectedPoint.x;
-					energy_text.position.y = selectedHeight + 1.5;
-					energy_text.position.z = refinedSelectedPoint.z;
+					energy_text.position.x = menu_pos.x;//refinedSelectedPoint.x;
+					energy_text.position.y = menu_pos.y+1.5;//selectedHeight + 1.5;
+					energy_text.position.z = menu_pos.z;//refinedSelectedPoint.z;
 					energy_text.rotation.y = Math.atan2( ( dolly.position.x - energy_text.position.x ), ( dolly.position.z - energy_text.position.z ) );
 					entities.add(energy_text);
 
@@ -730,4 +731,19 @@ highlight - menu change colour when selected
 	}
 	
 	
+	function getMenuPosition(point) {
+		var vecToPlayer = new THREE.Vector3(point.x - dolly.position.x, point.y-dolly.position.y, point.z-dolly.position.z);
+		var l = vecToPlayer.length();
+        if (l > 7) {
+			vecToPlayer.normalize();
+			vecToPlayer.multiplyScalar(7); // Distance to menu
+			vecToPlayer.x += dolly.position.x;
+			vecToPlayer.y += dolly.position.y+.5;
+			vecToPlayer.z += dolly.position.z;
+
+			return vecToPlayer;
+		} else {
+			return point;
+		}
+	}
 	
