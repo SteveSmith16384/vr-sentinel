@@ -16,7 +16,6 @@ highlight - menu change colour when selected
 
 	// Settings
 	const DEBUG = false;
-	const DEBUG_SENTINELS = true;
 	const sentinelView = Math.PI / 8;
 	const SENTINEL_HEIGHT = 2;
 	const START_ENERGY = 10;
@@ -44,8 +43,7 @@ highlight - menu change colour when selected
 	var player_moved;
 	var level_started;
 	var level = 1;
-	//var sentinalSeenPlayer;
-	var SIZE;
+	var SIZE; // Map size
 	
 	const tempMatrix = new THREE.Matrix4();
 	const raycaster = new THREE.Raycaster();
